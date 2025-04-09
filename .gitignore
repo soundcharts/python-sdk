@@ -1,0 +1,20 @@
+# Byte-compiled files
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# OS-specific files
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Tests
+*.test.py
+*.egg-info/
+
+# Todo
+todo.txt
