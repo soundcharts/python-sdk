@@ -7,6 +7,8 @@ from .album import Album
 from .charts import Charts
 from .playlist import Playlist
 from .radio import Radio
+from .festival import Festival
+from .venue import Venue
 from .tiktok import Tiktok
 from .user import User
 from .mylibrary import MyLibrary
@@ -48,6 +50,8 @@ class SoundchartsClient:
         self.charts = Charts()
         self.playlist = Playlist()
         self.radio = Radio()
+        self.festival = Festival()
+        self.venue = Venue()
         self.tiktok = Tiktok()
         self.user = User()
         self.mylibrary = MyLibrary()
