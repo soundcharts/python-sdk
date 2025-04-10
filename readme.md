@@ -19,7 +19,7 @@ You will need a Soundcharts API subscription to use this package.
 
 ## Installation
 
-Clone this repository and include the `soundcharts` folder in your Python path.
+`pip install soundcharts`
 
 ## Usage
 
