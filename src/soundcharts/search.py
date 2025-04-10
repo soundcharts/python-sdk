@@ -35,3 +35,11 @@ class Search:
     @staticmethod
     def search_radio_by_name(term, offset=0, limit=20):
         return search_by_type("radio", term, offset, limit)
+
+    @staticmethod
+    def search_festival_by_name(term, offset=0, limit=20):
+        return search_by_type("festival", term, offset, limit)
+
+    @staticmethod
+    def search_venue_by_name(term, offset=0, limit=20):
+        return search_by_type("venue", term, offset, limit)
