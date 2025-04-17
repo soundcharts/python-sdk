@@ -187,6 +187,22 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
+    def get_soundcharts_score(artist_uuid, start_date=None, end_date=None):
+        """
+        This API returns 3 Soundcharts scores per artist: score, fanbase score and trending score.
+
+        :param artist_uuid: An artist UUID.
+        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/artist/{artist_uuid}/soundcharts/score"
+        params = {"startDate": start_date, "endDate": end_date}
+        result = request_wrapper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_audience(artist_uuid, platform="spotify", start_date=None, end_date=None):
         """
         Get an artist's followers across services.
