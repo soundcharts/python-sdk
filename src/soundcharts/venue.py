@@ -52,7 +52,7 @@ class Venue:
         }
 
         endpoint = f"/api/v2/venue/{venue_uuid}/concerts"
-        result = request_looper(endpoint, params)
+        result = request_looper(endpoint, params, handle_period=False)
         return result if result is not None else {}
 
     @staticmethod
