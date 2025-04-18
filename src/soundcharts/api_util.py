@@ -180,6 +180,7 @@ def request_looper(
     endpoint,
     params=None,
     body=None,
+    handle_period = True,
     max_retries=MAX_RETRIES,
     retry_delay=RETRY_DELAY,
     print_progress=False,
@@ -236,7 +237,7 @@ def request_looper(
             params["limit"] = min(limit, 100)
 
     while period > 0:
-        if end_date is not None:
+        if end_date is not None and handle_period:
             params["endDate"] = end_date
             period = min(date_difference(start_date, end_date), 90)
             params["startDate"] = str_date_add(end_date, -period)
@@ -290,6 +291,7 @@ def request_looper(
             end_date is None
             or start_date == end_date
             or date_difference(start_date, end_date) < 0
+            or handle_period == False
         ):
             break
 

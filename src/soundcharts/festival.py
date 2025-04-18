@@ -54,7 +54,7 @@ class Festival:
         }
 
         endpoint = f"/api/v2/festival/{festival_uuid}/editions"
-        result = request_looper(endpoint, params)
+        result = request_looper(endpoint, params, handle_period=False)
         return result if result is not None else {}
 
     @staticmethod
