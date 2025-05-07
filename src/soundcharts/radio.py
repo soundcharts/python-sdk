@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import request_wrapper, request_looper, sort_items_by_date
 
 
 class Radio:
@@ -53,7 +53,7 @@ class Radio:
             "limit": limit,
         }
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True, key="airedAt")
 
     @staticmethod
     def get_ids(radio_slug, platform=None, offset=0, limit=100):

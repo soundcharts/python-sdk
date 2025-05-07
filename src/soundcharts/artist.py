@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import request_wrapper, request_looper, sort_items_by_date
 from datetime import datetime
 
 
@@ -217,15 +217,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        if result == None:
-            return {}
-
-        result["items"] = sorted(
-            result["items"],
-            key=lambda x: datetime.fromisoformat(x["date"].replace("Z", "")),
-        )
-
-        return result
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_local_audience(
@@ -244,7 +236,7 @@ class Artist:
         endpoint = f"/api/v2.37/artist/{artist_uuid}/social/{platform}/followers/"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_streaming_audience(
@@ -262,7 +254,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}/listening"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_local_streaming_audience(
@@ -280,7 +272,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_retention(artist_uuid, platform="spotify", start_date=None, end_date=None):
@@ -296,7 +288,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/{platform}/retention"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_popularity(artist_uuid, platform="spotify", start_date=None, end_date=None):
@@ -312,7 +304,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/popularity/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result)
 
     @staticmethod
     def get_audience_report_latest(artist_uuid, platform):
@@ -352,7 +344,7 @@ class Artist:
             "limit": limit,
         }
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     def get_audience_report_for_a_date(artist_uuid, platform, date):
@@ -397,7 +389,7 @@ class Artist:
         endpoint = f"/api/v2/artist/shorts/{identifier}/audience"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     def get_chart_song_entries(
@@ -569,37 +561,40 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
-    def get_songkick_events(
+    def get_events(
         artist_uuid,
         event_type="all",
-        period_type="all",
+        start_date=None,
+        end_date=None,
         offset=0,
         limit=100,
         sort_by="date",
-        sort_order="desc",
+        sort_order="asc",
     ):
         """
         Get future and past event details, venue, capacity, and ticket price.
 
         :param artist_uuid: An artist UUID.
-        :param event_type: An event type (Available values are : all, concert, festival).
-        :param period_type: A period type (Available values are : all, past, upcoming).
+        :param event_type: An event type (Available values are : all, concert, festival, online).
+        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param end_date: Optional period end date (format YYYY-MM-DD).
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :param sort_by: Sort criteria. Available values are : date.
-        :param sort_order: Sort order. Available values are : asc, desc. Default: desc.
+        :param sort_order: Sort order. Available values are : asc, desc. Default: asc.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2.19/artist/{artist_uuid}/songkick/events"
         params = {
             "type": event_type,
-            "periodType": period_type,
+            "startDate": start_date,
+            "endDate": end_date,
             "offset": offset,
             "limit": limit,
             "sortBy": sort_by,
             "sortOrder": sort_order,
         }
-        result = request_looper(endpoint, params)
+        result = request_looper(endpoint, params, handle_period=False)
         return result if result is not None else {}
 
     @staticmethod

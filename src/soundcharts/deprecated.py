@@ -113,3 +113,38 @@ class Deprecated:
 
         result = request_looper(endpoint, params)
         return result if result is not None else {}
+
+    @staticmethod
+    def get_songkick_events(
+        artist_uuid,
+        event_type="all",
+        period_type="all",
+        offset=0,
+        limit=100,
+        sort_by="date",
+        sort_order="desc",
+    ):
+        """
+        WARNING: This endpoint is now deprecated and will soon be removed for good.
+        Get future and past event details, venue, capacity, and ticket price.
+
+        :param artist_uuid: An artist UUID.
+        :param event_type: An event type (Available values are : all, concert, festival).
+        :param period_type: A period type (Available values are : all, past, upcoming).
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort_by: Sort criteria. Available values are : date.
+        :param sort_order: Sort order. Available values are : asc, desc. Default: desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2.19/artist/{artist_uuid}/songkick/events"
+        params = {
+            "type": event_type,
+            "periodType": period_type,
+            "offset": offset,
+            "limit": limit,
+            "sortBy": sort_by,
+            "sortOrder": sort_order,
+        }
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
