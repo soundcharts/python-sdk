@@ -188,11 +188,18 @@ def request_wrapper(
                 HTTPStatus.FORBIDDEN,
                 HTTPStatus.UNAUTHORIZED,
             }:
-                log_msg = f"{response.status_code} Error: {message}"
-                logger.error(log_msg)
-                if logging.ERROR >= EXCEPTION_LOG_LEVEL:
-                    raise RuntimeError(log_msg)
-                return None
+
+                if response.status_code == 429 and "maximum request count" in message:
+                    logger.warning(
+                        f"{response.status_code} Error: {message} — Retrying in 30 seconds ({attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(30)
+                else:
+                    log_msg = f"{response.status_code} Error: {message}"
+                    logger.error(log_msg)
+                    if logging.ERROR >= EXCEPTION_LOG_LEVEL:
+                        raise RuntimeError(log_msg)
+                    return None
 
             # Unknown errors
             else:
