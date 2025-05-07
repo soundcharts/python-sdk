@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 from .api_util import setup as api_setup
 from .search import Search
 from .artist import Artist
@@ -25,22 +26,36 @@ class SoundchartsClient:
         app_id,
         api_key,
         base_url="https://customer.api.soundcharts.com",
-        log_errors=True,
         max_retries=5,
         retry_delay=10,
+        console_log_level=logging.INFO,
+        file_log_level=logging.WARNING,
+        exception_log_level=logging.ERROR,
     ):
         """
-        Initialize the Soundcharts client.
+        Initialize the Soundcharts client. Use the logging python library to specify the logging level.
+        Logging levels : DEBUG, INFO, WARNING, ERROR, CRITICAL.
 
-        :param app_id: App ID for authenticating requests.
-        :param api_key: API key, or token, for authenticating requests.
-        :param base_url: Base URL for the API. Defaults to the production API URL.
-        :param log_errors: Decide whether or not to log errors. Default: True
-        :param max_retries: Max number of retries in case of an error 500 (default: 5).
-        :param retry_delay: Time in seconds between retries for a 500 error (default: 10).
+        :param app_id: Soundcharts App ID
+        :param api_key: Soundcharts API Key
+        :param base_url: Base URL for API. Default: production.
+        :param max_retries: Max number of retries in case of an error 500. Default: 5.
+        :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
+        :param console_log_level: The severity of issues written to the console. Default: logging.INFO.
+        :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
+        :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
         """
 
-        api_setup(app_id, api_key, base_url, log_errors, max_retries, retry_delay)
+        api_setup(
+            app_id,
+            api_key,
+            base_url,
+            max_retries,
+            retry_delay,
+            console_log_level,
+            file_log_level,
+            exception_log_level,
+        )
 
         # Initialize submodules
         self.search = Search()

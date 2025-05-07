@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import request_wrapper, request_looper, sort_items_by_date
 
 
 class Venue:
@@ -53,7 +53,7 @@ class Venue:
 
         endpoint = f"/api/v2/venue/{venue_uuid}/concerts"
         result = request_looper(endpoint, params, handle_period=False)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     def get_concert_details(concert_uuid):

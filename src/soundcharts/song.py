@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import request_wrapper, request_looper, sort_items_by_date
 
 
 class Song:
@@ -160,7 +160,7 @@ class Song:
             "identifier": identifier,
         }
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     def get_spotify_popularity(song_uuid, start_date=None, end_date=None):
@@ -175,7 +175,7 @@ class Song:
         endpoint = f"/api/v2/song/{song_uuid}/spotify/identifier/popularity"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     def get_chart_entries(
@@ -276,7 +276,7 @@ class Song:
             "limit": limit,
         }
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, key="airedAt")
 
     @staticmethod
     def get_radio_spin_count(
