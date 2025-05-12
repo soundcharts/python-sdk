@@ -43,3 +43,17 @@ class Search:
     @staticmethod
     def search_venue_by_name(term, offset=0, limit=20):
         return search_by_type("venue", term, offset, limit)
+    
+    @staticmethod
+    def get_soundcharts_url_from_platform_url(platform_url):
+        """
+        This endpoint returns the Soundcharts URL and the type (artist, song, playlist).
+        Available platforms for songs/artists are listed in the Get all platforms endpoint.
+        Available platforms for playlists are listed in the Get platforms for playlist data endpoint.
+        :param platform_url: A platform URL.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/search/external/url"
+        params = {"platformUrl": platform_url}
+        result = request_wrapper(endpoint, params)
+        return result if result is not None else {}
