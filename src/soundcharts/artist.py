@@ -584,7 +584,7 @@ class Artist:
         :param sort_order: Sort order. Available values are : asc, desc. Default: asc.
         :return: JSON response or an empty dictionary.
         """
-        endpoint = f"/api/v2.19/artist/{artist_uuid}/songkick/events"
+        endpoint = f"/api/v2/artist/{artist_uuid}/events"
         params = {
             "type": event_type,
             "startDate": start_date,
