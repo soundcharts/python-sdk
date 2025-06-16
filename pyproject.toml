@@ -1,6 +1,6 @@
 [project]
 name = "soundcharts"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
   { name="Soundcharts Tech", email="tech@soundcharts.com" },
 ]

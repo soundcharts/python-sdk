@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import request_wrapper, request_looper, sort_items_by_date
 
 
 class Charts:
@@ -94,7 +94,7 @@ class Charts:
         endpoint = f"/api/v2/chart/song/{chart_slug}/available-rankings"
         params = {"offset": offset, "limit": limit}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True, None)
 
     @staticmethod
     def get_song_ranking_for_a_date(chart_slug, datetime, offset=0, limit=100):
@@ -158,7 +158,7 @@ class Charts:
         endpoint = f"/api/v2/chart/album/{chart_slug}/available-rankings"
         params = {"offset": offset, "limit": limit}
         result = request_looper(endpoint, params)
-        return result if result is not None else {}
+        return {} if result is None else sort_items_by_date(result, True, None)
 
     @staticmethod
     def get_album_ranking_for_a_date(chart_slug, datetime, offset=0, limit=100):
