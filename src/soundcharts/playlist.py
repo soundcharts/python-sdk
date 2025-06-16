@@ -215,7 +215,7 @@ class Playlist:
             "limit": limit,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return {} if result is None else sort_items_by_date(result, True, None)
 
     @staticmethod
     def get_tracklisting_for_a_date(playlist_uuid, datetime, offset=0, limit=100):

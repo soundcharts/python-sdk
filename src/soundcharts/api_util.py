@@ -203,7 +203,8 @@ def request_wrapper(
 
             # Unknown errors
             else:
-                logger.error(response.status_code, log_msg)
+                log_msg = f"{response.status_code} Unknown Error: {message}"
+                logger.error(log_msg)
                 if logging.ERROR >= EXCEPTION_LOG_LEVEL:
                     raise RuntimeError(f"HTTP {response.status_code}: {message}")
 
@@ -332,9 +333,14 @@ def request_looper(
 
 def sort_items_by_date(result, reverse=False, key="date"):
 
+    if key is not None:
+        sort_key = lambda x: datetime.fromisoformat(x[key].replace("Z", ""))
+    else:
+        sort_key = lambda x: datetime.fromisoformat(x.replace("Z", ""))
+
     result["items"] = sorted(
         result["items"],
-        key=lambda x: datetime.fromisoformat(x[key].replace("Z", "")),
+        key=sort_key,
         reverse=reverse,
     )
 
