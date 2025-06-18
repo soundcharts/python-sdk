@@ -144,7 +144,7 @@ class Artist:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.21/artist/{artist_uuid}/albums"
+        endpoint = f"/api/v2.34/artist/{artist_uuid}/albums"
         params = {
             "type": album_type,
             "offset": offset,
