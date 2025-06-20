@@ -3,7 +3,7 @@ from .api_util import request_wrapper, request_looper
 
 class User:
     @staticmethod
-    def get_blocklist_artists(email, offset=0, limit=100):
+    def get_blocklists_artists(email, offset=0, limit=100):
         """
         Get a dashboard user’s blocklists for artist profiles.
 
@@ -19,7 +19,7 @@ class User:
         return result if result is not None else {}
 
     @staticmethod
-    def get_blocklist_songs(email, offset=0, limit=100):
+    def get_blocklists_songs(email, offset=0, limit=100):
         """
         Get a dashboard user’s blocklists for song profiles.
 
@@ -35,7 +35,7 @@ class User:
         return result if result is not None else {}
 
     @staticmethod
-    def get_blocklist_labels(email, offset=0, limit=100):
+    def get_blocklists_labels(email, offset=0, limit=100):
         """
         Get a dashboard user’s blocklists for labels profiles.
 

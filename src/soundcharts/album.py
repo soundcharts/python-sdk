@@ -99,7 +99,7 @@ class Album:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/{album_uuid}/tracks"
+        endpoint = f"/api/v2.26/album/{album_uuid}/tracks"
         result = request_wrapper(endpoint)
         return result if result is not None else {}
 
