@@ -105,3 +105,62 @@ class Referential:
         params = {"searchCity": search_city, "offset": offset, "limit": limit}
         result = request_looper(endpoint, params)
         return result if result is not None else {}
+
+    @staticmethod
+    def get_song_genres(genre="all", sort_order="asc"):
+        """
+        Get all song genres and the associated subgenres.
+        This endpoint is useful for the Get Songs endpoint.
+        :param genre: Select a specific song genre. Default: all.
+        :param sort_order: Sort order. Available values are : asc, desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/referential/song/genres"
+        params = {"genre": genre, "sortOrder": sort_order}
+        result = request_wrapper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_label_types():
+        """
+        Get all label types.
+        This endpoint is useful for the Get Songs endpoint.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/referential/label-types"
+        result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_distributors(offset=0, limit=100):
+        """
+        Get all distributors.
+        This endpoint is useful for the Get Songs endpoint.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/referential/distributors"
+        params = {"offset": offset, "limit": limit}
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_lyrics_attributes(attribute, term=None, offset=0, limit=100):
+        """
+        Get the list of available values by lyrics attribute.
+        :param attribute: The type of attribute. Available values : themes, moods, culturalReferencePeople, culturalReferenceNonPeople, brands, locations.
+        :param term: Search an item which contains the term. Default: None.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/referential/lyrics-attributes"
+        params = {
+            "attribute": attribute,
+            "term": term,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
