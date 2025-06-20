@@ -28,7 +28,7 @@ class SoundchartsClient:
         base_url="https://customer.api.soundcharts.com",
         max_retries=5,
         retry_delay=10,
-        console_log_level=logging.INFO,
+        console_log_level=logging.WARNING,
         file_log_level=logging.WARNING,
         exception_log_level=logging.ERROR,
     ):
