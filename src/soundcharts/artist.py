@@ -217,7 +217,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result)
+        return {} if result is None or len(result)==0 else sort_items_by_date(result)
 
     @staticmethod
     def get_local_audience(
