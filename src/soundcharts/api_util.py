@@ -333,6 +333,9 @@ def request_looper(
 
 def sort_items_by_date(result, reverse=False, key="date"):
 
+    if result == None or len(result) == 0:
+        return result
+
     if key is not None:
         sort_key = lambda x: datetime.fromisoformat(x[key].replace("Z", ""))
     else:
