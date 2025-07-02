@@ -4,6 +4,49 @@ from .api_util import request_wrapper, request_looper, sort_items_by_date
 class Venue:
 
     @staticmethod
+    def get_venues(
+        offset=0,
+        limit=100,
+        body=None,
+        print_progress=False,
+    ):
+        """
+        Get a list of venues filtered by attributes and stats.
+
+        You can sort and filter venues in our database using specific parameters such as social metrics, score, capacity or name.
+        You'll find available platfom/metricType combinations in the documentation: https://doc.api.soundcharts.com/api/v2/doc/reference/path/venue/get-venues
+
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
+        :param body: JSON Payload. If none, the default sorting will apply (descending soundcharts score) and there will be no filters.
+        :param print_progress: Prints an estimated progress percentage (default: False).
+        :return: JSON response or an empty dictionary.
+        """
+
+        if body == None:
+            platform, metric_type = "soundcharts", "score"
+
+            body = {
+                "sort": {
+                    "platform": platform,
+                    "metricType": metric_type,
+                    "period": "month",
+                    "sortBy": "total",
+                    "order": "desc",
+                },
+                "filters": [],
+            }
+
+        endpoint = f"/api/v2/top/venues"
+        params = {
+            "offset": offset,
+            "limit": limit,
+        }
+
+        result = request_looper(endpoint, params, body, print_progress=print_progress)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_venue_metadata(venue_uuid):
         """
         Get the venue’s metadata.

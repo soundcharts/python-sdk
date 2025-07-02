@@ -20,7 +20,7 @@ class MyLibrary:
         return result if result is not None else {}
 
     @staticmethod
-    def add_artist_ids(identifiers):
+    def add_artists_ids(identifiers):
         """
         Add artists to your personal library. This endpoint is restricted to specific plans.
 
@@ -41,7 +41,7 @@ class MyLibrary:
         return result if result is not None else {}
 
     @staticmethod
-    def delete_artist_ids(identifiers):
+    def delete_artists_ids(identifiers):
         """
         Add artists to your personal library. This endpoint is restricted to specific plans.
 
@@ -77,7 +77,7 @@ class MyLibrary:
         return result if result is not None else {}
 
     @staticmethod
-    def add_song_ids(identifiers):
+    def add_songs_ids(identifiers):
         """
         Add songs to your personal library. This endpoint is restricted to specific plans.
 
@@ -98,7 +98,7 @@ class MyLibrary:
         return result if result is not None else {}
 
     @staticmethod
-    def delete_song_ids(identifiers):
+    def delete_songs_ids(identifiers):
         """
         Add songs to your personal library. This endpoint is restricted to specific plans.
 

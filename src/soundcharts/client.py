@@ -28,7 +28,7 @@ class SoundchartsClient:
         base_url="https://customer.api.soundcharts.com",
         max_retries=5,
         retry_delay=10,
-        console_log_level=logging.INFO,
+        console_log_level=logging.WARNING,
         file_log_level=logging.WARNING,
         exception_log_level=logging.ERROR,
     ):
@@ -41,7 +41,7 @@ class SoundchartsClient:
         :param base_url: Base URL for API. Default: production.
         :param max_retries: Max number of retries in case of an error 500. Default: 5.
         :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
-        :param console_log_level: The severity of issues written to the console. Default: logging.INFO.
+        :param console_log_level: The severity of issues written to the console. Default: logging.WARNING.
         :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
         :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
         """
