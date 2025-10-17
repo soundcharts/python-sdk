@@ -169,16 +169,17 @@ class Song:
         return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
-    def get_spotify_popularity(song_uuid, start_date=None, end_date=None):
+    def get_popularity(song_uuid, platform="spotify", start_date=None, end_date=None):
         """
-        Get daily values for Spotify song popularity.
+        Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
 
         :param song_uuid: A song UUID.
+        :param platform: A social platform code. Available values : spotify, deezer, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
         :return: JSON response or an empty dictionary.
         """
-        endpoint = f"/api/v2/song/{song_uuid}/spotify/identifier/popularity"
+        endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
