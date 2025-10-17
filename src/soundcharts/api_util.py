@@ -348,3 +348,8 @@ def sort_items_by_date(result, reverse=False, key="date"):
     )
 
     return result
+
+
+def list_join(list, separator=","):
+    result_string = separator.join(str(item) for item in list)
+    return result_string

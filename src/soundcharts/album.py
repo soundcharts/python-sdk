@@ -43,17 +43,23 @@ class Album:
         return result if result is not None else {}
 
     @staticmethod
-    def get_ids(album_uuid, platform=None, offset=0, limit=100):
+    def get_ids(album_uuid, platform=None, only_default=False, offset=0, limit=100):
         """
         Get platform URLs/ISNI associated with a specific album.
 
         :param album_uuid: An album UUID.
         :param platform: A platform code. Default: None.
+        :param only_default: Only return default identifiers. Default: False.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
-        params = {"platform": platform, "offset": offset, "limit": limit}
+        params = {
+            "platform": platform,
+            "onlyDefault": only_default,
+            "offset": offset,
+            "limit": limit,
+        }
 
         endpoint = f"/api/v2.26/album/{album_uuid}/identifiers"
         result = request_looper(endpoint, params)
