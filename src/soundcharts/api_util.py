@@ -89,9 +89,9 @@ def request_wrapper(
     endpoint,
     params=None,
     body=None,
-    max_retries=MAX_RETRIES,
-    retry_delay=RETRY_DELAY,
-    timeout=TIMEOUT,
+    max_retries=None,
+    retry_delay=None,
+    timeout=None,
     method=None,
 ):
     """
@@ -106,7 +106,16 @@ def request_wrapper(
     :param timeout: Request timeout in seconds.
     :return: Parsed JSON response if successful, None for 404, raises RuntimeError for other errors.
     """
-    global HEADERS
+
+    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT
+
+    # Use current config if args not provided
+    if max_retries is None:
+        max_retries = MAX_RETRIES
+    if retry_delay is None:
+        retry_delay = RETRY_DELAY
+    if timeout is None:
+        timeout = TIMEOUT  # allow tuple e.g. (5, 30)
 
     url = f"{BASE_URL}{endpoint}"
     headers = HEADERS.copy()
