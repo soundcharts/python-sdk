@@ -1,4 +1,4 @@
-from .api_util import request_wrapper, request_looper, sort_items_by_date
+from .api_util import request_wrapper, request_looper, sort_items_by_date, list_join
 from datetime import datetime
 
 
@@ -84,17 +84,23 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
-    def get_ids(artist_uuid, platform=None, offset=0, limit=100):
+    def get_ids(artist_uuid, platform=None, only_default=False, offset=0, limit=100):
         """
         Get platform URLs/ISNI associated with a specific artist.
 
         :param artist_uuid: An artist UUID.
         :param platform: A platform code. Default: None.
+        :param only_default: Only return default identifiers. Default: False.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
-        params = {"platform": platform, "offset": offset, "limit": limit}
+        params = {
+            "platform": platform,
+            "onlyDefault": only_default,
+            "offset": offset,
+            "limit": limit,
+        }
 
         endpoint = f"/api/v2/artist/{artist_uuid}/identifiers"
         result = request_looper(endpoint, params)
@@ -217,7 +223,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result)==0 else sort_items_by_date(result)
+        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
 
     @staticmethod
     def get_local_audience(
@@ -236,7 +242,7 @@ class Artist:
         endpoint = f"/api/v2.37/artist/{artist_uuid}/social/{platform}/followers/"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result)==0 else sort_items_by_date(result)
+        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
 
     @staticmethod
     def get_streaming_audience(
@@ -254,7 +260,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}/listening"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result)==0 else sort_items_by_date(result)
+        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
 
     @staticmethod
     def get_local_streaming_audience(
@@ -272,7 +278,7 @@ class Artist:
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result)==0 else sort_items_by_date(result)
+        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
 
     @staticmethod
     def get_retention(artist_uuid, platform="spotify", start_date=None, end_date=None):
@@ -462,6 +468,9 @@ class Artist:
         artist_uuid,
         platform="spotify",
         playlist_type="all",
+        current_only=False,
+        country_code=None,
+        playlist_uuids=[],
         offset=0,
         limit=100,
         sort_by="entryDate",
@@ -473,6 +482,9 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A playlist platform code. Default: spotify.
         :param playlist_type: A playlist type. Available values are : 'all' or one of editorial, algorithmic, algotorial, major, charts, curators_listeners, radios, this_is.
+        :param current_only: Get only the current positions in playlist (True), or the current and past positions (False). Default : False.
+        :param country_code: Country code (2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2).
+        :param playlist_uuids: A list of playlist UUIDs.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :param sort_by: Sort criteria. Available values are : position, positionDate, entryDate, subscriberCount.
@@ -480,8 +492,19 @@ class Artist:
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2.20/artist/{artist_uuid}/playlist/current/{platform}"
+
+        if current_only:
+            current_only = 1
+        else:
+            current_only = 0
+
+        playlist_uuids = list_join(playlist_uuids, ",")
+
         params = {
             "type": playlist_type,
+            "currentOnly": current_only,
+            "countryCode": country_code,
+            "playlistUuids": playlist_uuids,
             "offset": offset,
             "limit": limit,
             "sortBy": sort_by,

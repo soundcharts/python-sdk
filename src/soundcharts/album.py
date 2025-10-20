@@ -53,7 +53,11 @@ class Album:
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
-        params = {"platform": platform, "offset": offset, "limit": limit}
+        params = {
+            "platform": platform,
+            "offset": offset,
+            "limit": limit,
+        }
 
         endpoint = f"/api/v2.26/album/{album_uuid}/identifiers"
         result = request_looper(endpoint, params)

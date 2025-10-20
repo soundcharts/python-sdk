@@ -90,17 +90,23 @@ class Song:
         return result if result is not None else {}
 
     @staticmethod
-    def get_ids(song_uuid, platform=None, offset=0, limit=100):
+    def get_ids(song_uuid, platform=None, only_default=False, offset=0, limit=100):
         """
         Get platform URLs/ISNI associated with a specific song.
 
         :param song_uuid: A song UUID.
         :param platform: A platform code.
+        :param only_default: Only return default identifiers. Default: False.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
-        params = {"platform": platform, "offset": offset, "limit": limit}
+        params = {
+            "platform": platform,
+            "onlyDefault": only_default,
+            "offset": offset,
+            "limit": limit,
+        }
 
         endpoint = f"/api/v2/song/{song_uuid}/identifiers"
         result = request_looper(endpoint, params)
@@ -163,16 +169,17 @@ class Song:
         return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
-    def get_spotify_popularity(song_uuid, start_date=None, end_date=None):
+    def get_popularity(song_uuid, platform="spotify", start_date=None, end_date=None):
         """
-        Get daily values for Spotify song popularity.
+        Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
 
         :param song_uuid: A song UUID.
+        :param platform: A social platform code. Available values : spotify, deezer, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
         :return: JSON response or an empty dictionary.
         """
-        endpoint = f"/api/v2/song/{song_uuid}/spotify/identifier/popularity"
+        endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
         params = {"startDate": start_date, "endDate": end_date}
         result = request_looper(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
@@ -215,6 +222,9 @@ class Song:
         song_uuid,
         platform="spotify",
         playlist_type="all",
+        current_only=False,
+        country_code=None,
+        playlist_uuids=[],
         offset=0,
         limit=100,
         sort_by="entryDate",
@@ -226,6 +236,9 @@ class Song:
         :param song_uuid: A song UUID.
         :param platform: A playlist platform code. Default: spotify.
         :param playlist_type: A playlist type. Available values are : 'all' or one of editorial, algorithmic, algotorial, major, charts, curators_listeners, radios, this_is.
+        :param current_only: Get only the current positions in playlist (True), or the current and past positions (False). Default : False.
+        :param country_code: Country code (2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2).
+        :param playlist_uuids: A list of playlist UUIDs.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :param sort_by: Sort criteria. Available values are : position, positionDate, entryDate, subscriberCount.
@@ -235,6 +248,9 @@ class Song:
         endpoint = f"/api/v2.20/song/{song_uuid}/playlist/current/{platform}"
         params = {
             "type": playlist_type,
+            "currentOnly": current_only,
+            "countryCode": country_code,
+            "playlistUuids": playlist_uuids,
             "offset": offset,
             "limit": limit,
             "sortBy": sort_by,
