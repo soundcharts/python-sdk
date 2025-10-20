@@ -89,9 +89,9 @@ def request_wrapper(
     endpoint,
     params=None,
     body=None,
-    max_retries=None,
-    retry_delay=None,
-    timeout=None,
+    max_retries=MAX_RETRIES,
+    retry_delay=RETRY_DELAY,
+    timeout=TIMEOUT,
     method=None,
 ):
     """
