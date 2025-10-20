@@ -34,6 +34,7 @@ HEADERS = None
 BASE_URL = None
 MAX_RETRIES = 5
 RETRY_DELAY = 10
+TIMEOUT = 10
 EXCEPTION_LOG_LEVEL = logging.ERROR
 
 
@@ -43,6 +44,7 @@ def setup(
     base_url="https://customer.api.soundcharts.com",
     max_retries=5,
     retry_delay=10,
+    timeout=10,
     console_log_level=logging.WARNING,
     file_log_level=logging.WARNING,
     exception_log_level=logging.ERROR,
@@ -59,7 +61,7 @@ def setup(
     :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
     :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
     """
-    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, EXCEPTION_LOG_LEVEL
+    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT, EXCEPTION_LOG_LEVEL
 
     HEADERS = CaseInsensitiveDict()
     HEADERS["x-app-id"] = app_id
@@ -68,6 +70,7 @@ def setup(
     BASE_URL = base_url
     MAX_RETRIES = max_retries
     RETRY_DELAY = retry_delay
+    TIMEOUT = timeout
     EXCEPTION_LOG_LEVEL = exception_log_level
 
     # Clear existing handlers to avoid duplication
@@ -88,8 +91,8 @@ def request_wrapper(
     body=None,
     max_retries=MAX_RETRIES,
     retry_delay=RETRY_DELAY,
+    timeout=TIMEOUT,
     method=None,
-    timeout=10,
 ):
     """
     Sends a request to the Soundcharts API with error handling and retries.
@@ -164,7 +167,7 @@ def request_wrapper(
 
             # Handle known errors
             if response.status_code == HTTPStatus.NOT_FOUND:
-                log_msg = f"404 Not Found: {url} — {message}"
+                log_msg = f"404 Not Found: {full_url} — {message}"
                 logger.warning(log_msg)
                 if logging.WARNING >= EXCEPTION_LOG_LEVEL:
                     raise RuntimeError(log_msg)
@@ -178,7 +181,7 @@ def request_wrapper(
                 HTTPStatus.GATEWAY_TIMEOUT,
             }:
                 logger.warning(
-                    f"{response.status_code} Server Error: {message} — Retrying ({attempt + 1}/{max_retries})"
+                    f"{response.status_code} Server Error: {message} when calling {full_url} — Retrying ({attempt + 1}/{max_retries})"
                 )
                 time.sleep(retry_delay)
 
@@ -191,11 +194,11 @@ def request_wrapper(
 
                 if response.status_code == 429 and "maximum request count" in message:
                     logger.warning(
-                        f"{response.status_code} Error: {message} — Retrying in 30 seconds ({attempt + 1}/{max_retries})"
+                        f"{response.status_code} Error: {message} when calling {full_url} — Retrying in 30 seconds ({attempt + 1}/{max_retries})"
                     )
                     time.sleep(30)
                 else:
-                    log_msg = f"{response.status_code} Error: {message}"
+                    log_msg = f"{response.status_code} Error: {message} when calling {full_url}"
                     logger.error(log_msg)
                     if logging.ERROR >= EXCEPTION_LOG_LEVEL:
                         raise RuntimeError(log_msg)
@@ -203,7 +206,7 @@ def request_wrapper(
 
             # Unknown errors
             else:
-                log_msg = f"{response.status_code} Unknown Error: {message}"
+                log_msg = f"{response.status_code} Unknown Error: {message} when calling {full_url}"
                 logger.error(log_msg)
                 if logging.ERROR >= EXCEPTION_LOG_LEVEL:
                     raise RuntimeError(f"HTTP {response.status_code}: {message}")
@@ -211,9 +214,11 @@ def request_wrapper(
         except requests.RequestException as e:
             logger.error(f"Request exception: {e}")
             if attempt == max_retries - 1:
-                raise RuntimeError("Maximum retry attempts reached.") from e
+                raise RuntimeError(
+                    f"Maximum retry attempts reached when calling {full_url}."
+                ) from e
 
-    final_msg = "Unhandled error or maximum retries exceeded."
+    final_msg = f"Unhandled error or maximum retries exceeded when calling {full_url}."
     logger.error(final_msg)
     if logging.ERROR >= EXCEPTION_LOG_LEVEL:
         raise RuntimeError(final_msg)
