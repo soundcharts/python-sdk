@@ -514,6 +514,40 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
+    def get_playlist_reach(
+        artist_uuid,
+        platform="spotify",
+        playlist_type="all",
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
+        """
+        Get playlist reach & count for a specific artist.
+
+        :param artist_uuid: An artist UUID.
+        :param platform: A playlist platform code. Default: spotify. Available platforms are listed in the Get platforms for playlist data endpoint. While the playlist count is available for all of these, playlist reach is only available for spotify, youtube, deezer, jiosaavn and boomplay.
+        :param playlist_type: A playlist type. Available values are : 'all' or one of editorial, algorithmic, user.
+        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/artist/{artist_uuid}/playlist/reach/{platform}"
+
+        params = {
+            "type": playlist_type,
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_radio_spins(
         artist_uuid,
         radio_slugs=None,
