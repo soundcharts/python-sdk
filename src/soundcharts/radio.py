@@ -4,17 +4,46 @@ from .api_util import request_wrapper, request_looper, sort_items_by_date
 class Radio:
 
     @staticmethod
-    def get_radios(offset=0, limit=100):
+    def get_radios(
+        offset=0,
+        limit=100,
+        body=None,
+        print_progress=False,
+    ):
         """
-        Get the listing of all radios available on Soundcharts.
+        Get a list of radios filtered by attributes and stats.
+
+        You can sort radios in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like radio country, radio genres, track age or performance metrics.
+        You'll find available platfom/metricType combinations in the documentation: https://developers.soundcharts.com/documentation/reference/radio/get-radios
 
         :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
+        :param body: JSON Payload. If none, the default sorting will apply (descending soundcharts score) and there will be no filters.
+        :param print_progress: Prints an estimated progress percentage (default: False).
         :return: JSON response or an empty dictionary.
         """
-        endpoint = f"/api/v2.22/radio"
-        params = {"offset": offset, "limit": limit}
-        result = request_looper(endpoint, params)
+
+        if body == None:
+            platform, metric_type = "soundcharts", "reach"
+
+            body = {
+                "sort": {
+                    "platform": platform,
+                    "metricType": metric_type,
+                    "period": "month",
+                    "sortBy": "total",
+                    "order": "desc",
+                },
+                "filters": [],
+            }
+
+        endpoint = f"/api/v2/top/radios"
+        params = {
+            "offset": offset,
+            "limit": limit,
+        }
+
+        result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
 
     @staticmethod
