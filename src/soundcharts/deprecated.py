@@ -37,7 +37,7 @@ class Deprecated:
         """
 
         print(
-            "WARNING: The endpoint 'Get Artist Ranking' is now deprecated. Check out the new 'Get Artists' endpoint here: https://doc.api.soundcharts.com/api/v2/doc/reference/path/artist/get-artists/"
+            "WARNING: The endpoint 'Get Artist Ranking' is now deprecated. Check out the new 'Get Artists' endpoint here: https://developers.soundcharts.com/documentation/reference/artist/get-artists"
         )
         endpoint = f"/api/v2/top-artist/{platform}/{metric_type}"
 
@@ -95,7 +95,7 @@ class Deprecated:
         :return: JSON response or an empty dictionary.
         """
         print(
-            "WARNING: The endpoint 'Get Songs Ranking' is now deprecated. Check out the new 'Get Songs' endpoint here: https://doc.api.soundcharts.com/api/v2/doc/reference/path/song/get-songs/"
+            "WARNING: The endpoint 'Get Songs Ranking' is now deprecated. Check out the new 'Get Songs' endpoint here: https://developers.soundcharts.com/documentation/reference/song/get-songs"
         )
         endpoint = f"/api/v2/top-song/{platform}/{metric_type}"
 

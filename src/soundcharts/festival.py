@@ -14,7 +14,7 @@ class Festival:
         Get a list of festivals filtered by attributes and stats.
 
         You can sort and filter festivals in our database using specific parameters such as social metrics, score, capacity or name.
-        You'll find available platfom/metricType combinations in the documentation: https://doc.api.soundcharts.com/api/v2/doc/reference/path/festival/get-festivals
+        You'll find available platfom/metricType combinations in the documentation: https://developers.soundcharts.com/documentation/reference/festival/get-festivals
 
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.

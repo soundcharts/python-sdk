@@ -16,10 +16,10 @@ class Artist:
         """
         You can sort artists in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like nationality, genre, sub-genre, career stage, etc. or performance metrics.
         Platforms and metrics depend on the data scope: global, country, or city. For example, Spotify monthly listeners are available globally and by city but not by country.
-        You'll find available platfom/metricType combinations in the documentation: https://doc.api.soundcharts.com/api/v2/doc/reference/path/artist/get-artists
+        You'll find available platfom/metricType combinations in the documentation: https://developers.soundcharts.com/documentation/reference/artist/get-artists
 
         :param country_code: Add a country to get artists ranked by their stats in that specific country. Avalaible values: country code of 2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2. Leave empty to get the artists list based on their global stats.
-        :param city_key: Add a cityKey and a countryCode to get artists ranked by their stats in that specific city. Available values are listed in the https://doc.api.soundcharts.com/api/v2/doc/reference/path/referential/get-cities-for-artist-ranking endpoint.
+        :param city_key: Add a cityKey and a countryCode to get artists ranked by their stats in that specific city. Available values are listed in the "referential/get cities for artist ranking" endpoint (https://developers.soundcharts.com/documentation/reference/referential/get-cities-for-artist-ranking).
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (spotify followers for global ranking, instagram followers for country ranking, spotify monthly listeners for city ranking) and there will be no filters.

@@ -4,7 +4,7 @@ A Python package for interacting with the Soundcharts API.
 
 ## API Documentation
 
-Full documentation of the API is available here: [Soundcharts API Documentation](https://doc.api.soundcharts.com/api/v2/doc)
+Full documentation of the API is available here: [Soundcharts API Documentation](https://developers.soundcharts.com/documentation/getting-started)
 
 You will need a Soundcharts API subscription to use this package.
 

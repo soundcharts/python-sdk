@@ -6,7 +6,7 @@ class Song:
     def get_songs(offset=0, limit=100, body=None, print_progress=False):
         """
         You can sort songs in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like artist nationality, ISRC country, song genre, release date, attributes from lyrics analysis, etc. or performance metrics.
-        Available platfom/metricType combinations can be found in the documentation: https://doc.api.soundcharts.com/api/v2/doc/reference/path/song/get-songs
+        Available platfom/metricType combinations can be found in the documentation: https://developers.soundcharts.com/documentation/reference/song/get-songs
 
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
