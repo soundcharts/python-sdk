@@ -17,7 +17,7 @@ class Festival:
         You'll find available platfom/metricType combinations in the documentation: https://developers.soundcharts.com/documentation/reference/festival/get-festivals
 
         :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
+        :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending soundcharts score) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
         :return: JSON response or an empty dictionary.
@@ -97,7 +97,7 @@ class Festival:
         }
 
         endpoint = f"/api/v2/festival/{festival_uuid}/editions"
-        result = request_looper(endpoint, params, handle_period=False)
+        result = request_looper(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True, "startedAt")
 
     @staticmethod

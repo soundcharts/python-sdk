@@ -68,7 +68,7 @@ class Radio:
 
         :param radio_slug: A radio slug.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.

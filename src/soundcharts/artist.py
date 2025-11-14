@@ -199,7 +199,7 @@ class Artist:
 
         :param artist_uuid: An artist UUID.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
 
@@ -216,7 +216,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A social platform code. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
 
@@ -235,7 +235,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A social platform code. Available platforms for located followers: instagram, tiktok & youtube. Default: instagram.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
 
@@ -254,7 +254,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A streaming platform code. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}/listening"
@@ -272,7 +272,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A streaming platform code. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}"
@@ -288,7 +288,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A streaming platform code. Available values: spotify, youtube, anghami, jiosaavn. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/{platform}/retention"
@@ -304,7 +304,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A streaming platform code. Available values: spotify, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/popularity/{platform}"
@@ -335,7 +335,7 @@ class Artist:
         :param artist_uuid: An artist UUID.
         :param platform: A streaming platform code. Available values: instagram, youtube, tiktok.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -389,7 +389,7 @@ class Artist:
 
         :param identifier: A short/reel video identifier.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/shorts/{identifier}/audience"
@@ -530,7 +530,7 @@ class Artist:
         :param platform: A playlist platform code. Default: spotify. Available platforms are listed in the Get platforms for playlist data endpoint. While the playlist count is available for all of these, playlist reach is only available for spotify, youtube, deezer, jiosaavn and boomplay.
         :param playlist_type: A playlist type. Available values are : 'all' or one of editorial, algorithmic, user.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -564,7 +564,7 @@ class Artist:
         :param radio_slugs: Optional radio slugs filter (comma separated).
         :param country_code: Optional country code filter (2 letters ISO 3166-2, full list on https://en.wikipedia.org/wiki/ISO_3166-2).
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -599,7 +599,7 @@ class Artist:
         :param radio_slugs: Optional radio slugs filter (comma separated).
         :param country_code: Optional country code filter (2 letters ISO 3166-2, full list on https://en.wikipedia.org/wiki/ISO_3166-2).
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -651,7 +651,7 @@ class Artist:
             "sortBy": sort_by,
             "sortOrder": sort_order,
         }
-        result = request_looper(endpoint, params, handle_period=False)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
