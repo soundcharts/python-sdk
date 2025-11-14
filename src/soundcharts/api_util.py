@@ -1,24 +1,22 @@
-import requests
-import time
+import asyncio
+import aiohttp
 import json
 import logging
-from datetime import datetime, timedelta
 from requests.structures import CaseInsensitiveDict
 from http import HTTPStatus
-from math import ceil
+from datetime import datetime
+from urllib.parse import urlencode
 
 # Logger setup
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)  # Accept all levels; handlers will filter
+logger.setLevel(logging.DEBUG)
 
-# Console handler (default setup, level adjusted later)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(
     logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 )
 
 
-# File handler (delayed creation)
 class LazyFileHandler(logging.FileHandler):
     def __init__(self, filename, mode="a", encoding=None, delay=True):
         super().__init__(filename, mode, encoding, delay=delay)
@@ -29,9 +27,10 @@ log_file_handler.setFormatter(
     logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 )
 
-# Global config variables
+# Global config
 HEADERS = None
 BASE_URL = None
+PARALLEL_REQUESTS = 5
 MAX_RETRIES = 5
 RETRY_DELAY = 10
 TIMEOUT = 10
@@ -42,6 +41,7 @@ def setup(
     app_id,
     api_key,
     base_url="https://customer.api.soundcharts.com",
+    parallel_requests=5,
     max_retries=5,
     retry_delay=10,
     timeout=10,
@@ -49,40 +49,327 @@ def setup(
     file_log_level=logging.WARNING,
     exception_log_level=logging.ERROR,
 ):
-    """
-    Initialize the Soundcharts client.
-
-    :param app_id: Soundcharts App ID
-    :param api_key: Soundcharts API Key
-    :param base_url: Base URL for API. Default: production.
-    :param max_retries: Max number of retries in case of an error 500. Default: 5.
-    :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
-    :param console_log_level: The severity of issues written to the console. Default: logging.WARNING.
-    :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
-    :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
-    """
-    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT, EXCEPTION_LOG_LEVEL
+    global HEADERS, BASE_URL, PARALLEL_REQUESTS, MAX_RETRIES, RETRY_DELAY, TIMEOUT, EXCEPTION_LOG_LEVEL
 
     HEADERS = CaseInsensitiveDict()
     HEADERS["x-app-id"] = app_id
     HEADERS["x-api-key"] = api_key
 
     BASE_URL = base_url
+    PARALLEL_REQUESTS = parallel_requests
     MAX_RETRIES = max_retries
     RETRY_DELAY = retry_delay
     TIMEOUT = timeout
     EXCEPTION_LOG_LEVEL = exception_log_level
 
-    # Clear existing handlers to avoid duplication
     logger.handlers.clear()
 
-    # Add console handler with updated level
     console_handler.setLevel(console_log_level)
     logger.addHandler(console_handler)
 
-    # Add file handler with updated level
     log_file_handler.setLevel(file_log_level)
     logger.addHandler(log_file_handler)
+
+
+async def _request_wrapper_async(
+    endpoint,
+    params=None,
+    body=None,
+    max_retries=None,
+    retry_delay=None,
+    timeout=None,
+    method=None,
+    session: aiohttp.ClientSession | None = None,
+):
+    """
+    Async HTTP wrapper with retries.
+    """
+    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT
+
+    if max_retries is None:
+        max_retries = MAX_RETRIES
+    if retry_delay is None:
+        retry_delay = RETRY_DELAY
+    if timeout is None:
+        timeout = TIMEOUT
+
+    url = f"{BASE_URL}{endpoint}"
+    headers = dict(HEADERS or {})
+
+    raw_params = params or {}
+    # Drop only None values; keep 0 / False / "" etc.
+    params = {k: v for k, v in raw_params.items() if v is not None}
+
+    if body:
+        headers["Content-Type"] = "application/json"
+
+    owns_session = False
+    if session is None:
+        timeout_cfg = aiohttp.ClientTimeout(total=timeout)
+        session = aiohttp.ClientSession(timeout=timeout_cfg)
+        owns_session = True
+
+    try:
+        for attempt in range(max_retries):
+            try:
+                if method is None:
+                    method_name = "POST" if body else "GET"
+                elif method.lower() == "delete":
+                    method_name = "DELETE"
+                else:
+                    raise ValueError(f"Unsupported HTTP method: {method}")
+
+                if params:
+                    full_url = f"{url}?{urlencode(params, doseq=True)}"
+                else:
+                    full_url = url
+
+                logger.info(
+                    f"Attempt {attempt + 1}/{max_retries}: {method_name} {full_url}"
+                )
+                logger.debug(f"Headers: {headers}")
+                if params:
+                    logger.debug(f"Params: {params}")
+                if body:
+                    logger.debug(f"Body: {json.dumps(body)}")
+
+                async with session.request(
+                    method_name,
+                    url,
+                    params=params,
+                    headers=headers,
+                    data=json.dumps(body) if body else None,
+                ) as response:
+                    status = response.status
+                    text = await response.text()
+
+                    logger.debug(f"Response Status: {status}")
+                    logger.debug(f"Response Body: {text}")
+
+                    if status == HTTPStatus.OK:
+                        try:
+                            return await response.json()
+                        except Exception:
+                            return text
+
+                    # Extract error message
+                    try:
+                        error_data = await response.json()
+                        message = (
+                            error_data.get("errors", [{}])[0].get("message")
+                            or error_data.get("message")
+                            or text
+                        )
+                    except Exception:
+                        message = text
+
+                    # 404
+                    if status == HTTPStatus.NOT_FOUND:
+                        log_msg = f"404 Not Found: {full_url} — {message}"
+                        logger.warning(log_msg)
+                        if logging.WARNING >= EXCEPTION_LOG_LEVEL:
+                            raise RuntimeError(log_msg)
+                        return None
+
+                    # 5xx
+                    elif status in {
+                        HTTPStatus.INTERNAL_SERVER_ERROR,
+                        HTTPStatus.BAD_GATEWAY,
+                        HTTPStatus.SERVICE_UNAVAILABLE,
+                        HTTPStatus.GATEWAY_TIMEOUT,
+                    }:
+                        logger.warning(
+                            f"{status} Server Error: {message} when calling {full_url} — "
+                            f"Retrying ({attempt + 1}/{max_retries})"
+                        )
+                        await asyncio.sleep(retry_delay)
+
+                    # Auth / rate limit
+                    elif status in {
+                        HTTPStatus.TOO_MANY_REQUESTS,
+                        HTTPStatus.FORBIDDEN,
+                        HTTPStatus.UNAUTHORIZED,
+                    }:
+                        if (
+                            status == HTTPStatus.TOO_MANY_REQUESTS
+                            and "maximum request count" in message
+                        ):
+                            logger.warning(
+                                f"{status} Error: {message} when calling {full_url} — "
+                                f"Retrying in 30 seconds ({attempt + 1}/{max_retries})"
+                            )
+                            await asyncio.sleep(30)
+                        else:
+                            log_msg = (
+                                f"{status} Error: {message} when calling {full_url}"
+                            )
+                            logger.error(log_msg)
+                            if logging.ERROR >= EXCEPTION_LOG_LEVEL:
+                                raise RuntimeError(log_msg)
+                            return None
+
+                    else:
+                        log_msg = (
+                            f"{status} Unknown Error: {message} when calling {full_url}"
+                        )
+                        logger.error(log_msg)
+                        if logging.ERROR >= EXCEPTION_LOG_LEVEL:
+                            raise RuntimeError(f"HTTP {status}: {message}")
+
+            except aiohttp.ClientError as e:
+                logger.error(f"Request exception: {e}")
+                if attempt == max_retries - 1:
+                    raise RuntimeError(
+                        f"Maximum retry attempts reached when calling {full_url}."
+                    ) from e
+
+        final_msg = (
+            f"Unhandled error or maximum retries exceeded when calling {full_url}."
+        )
+        logger.error(final_msg)
+        if logging.ERROR >= EXCEPTION_LOG_LEVEL:
+            raise RuntimeError(final_msg)
+
+        return None
+
+    finally:
+        if owns_session and session is not None:
+            await session.close()
+
+
+async def _request_looper_async(endpoint, params=None, body=None, print_progress=False):
+    """
+    Async paginator with parallel fetching.
+    """
+
+    global PARALLEL_REQUESTS
+
+    def print_percentage(progress, total):
+        if total > 0:
+            percentage = min(round(progress * 100 / total, 2), 100)
+            print(f"\r{percentage}% done  ", end="", flush=True)
+            if progress >= total:
+                print()
+
+    params = params.copy() if params else {}
+    results = {}
+
+    # Limit / offset
+    raw_limit = params.pop("limit", None)  # remove it from params
+    if raw_limit is not None:
+        limit = int(raw_limit)
+        params["limit"] = min(limit, 100)
+    else:
+        limit = None  # no external limit, fetch everything
+
+    offset = int(params.get("offset") or 0)
+    params["offset"] = max(offset, 0)
+
+    timeout_cfg = aiohttp.ClientTimeout(total=TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+        # First page
+        first_params = params.copy()
+        results = await _request_wrapper_async(
+            endpoint,
+            first_params,
+            body=body,
+            session=session,
+        )
+
+        if not results or "items" not in results:
+            return results
+
+        items = list(results.get("items", []))
+
+        total_server = results.get("page", {}).get("total", len(items))
+        total = limit or total_server
+        total = min(total, total_server)
+        print(f"Total : {total}")
+
+        if print_progress:
+            print_percentage(len(items), total)
+
+        if len(items) >= total:
+            if limit:
+                results["items"] = items[:limit]
+            else:
+                results["items"] = items
+            if "page" in results:
+                results["page"]["total"] = total
+            return results
+
+        page_size = params.get("limit", 100)
+        extra_offsets = list(range(offset + page_size, total, page_size))
+        print(extra_offsets)
+        if not extra_offsets:
+            if limit:
+                results["items"] = items[:limit]
+            else:
+                results["items"] = items
+            if "page" in results:
+                results["page"]["total"] = total
+            return results
+
+        sem = asyncio.Semaphore(PARALLEL_REQUESTS)
+
+        async def fetch_page(off):
+            page_params = params.copy()
+            page_params["offset"] = off
+            page_params["limit"] = min(page_size, total - off)
+            async with sem:
+                return await _request_wrapper_async(
+                    endpoint,
+                    page_params,
+                    body=body,
+                    session=session,
+                )
+
+        tasks = [asyncio.create_task(fetch_page(o)) for o in extra_offsets]
+
+        for task in asyncio.as_completed(tasks):
+            response = await task
+            if not response or "items" not in response:
+                continue
+
+            page_items = response.get("items", [])
+            if not page_items or len(page_items) == 0:
+                continue
+
+            items.extend(page_items)
+
+            if print_progress:
+                progress = min(len(items), total)
+                print_percentage(progress, total)
+
+            if len(items) >= total:
+                continue
+
+        if limit:
+            items = items[:limit]
+
+        results["items"] = items
+        if "page" in results:
+            results["page"]["total"] = total
+
+        return results
+
+
+def _run_blocking(coro):
+    """
+    Run an async coroutine in a blocking way.
+    Used to provide a sync public API on top of async internals.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop -> normal script -> safe
+        return asyncio.run(coro)
+    else:
+        # Already in an event loop -> calling sync API from async code is a bad idea
+        raise RuntimeError(
+            "Soundcharts sync API called from an async context. "
+            "Use the async API directly instead."
+        )
 
 
 def request_wrapper(
@@ -95,254 +382,38 @@ def request_wrapper(
     method=None,
 ):
     """
-    Sends a request to the Soundcharts API with error handling and retries.
-
-    :param endpoint: The API endpoint (string).
-    :param params: Dictionary of query parameters (default: None).
-    :param body: JSON payload (default: None).
-    :param max_retries: Max retries for 5xx errors.
-    :param retry_delay: Delay between retries in seconds.
-    :param method: HTTP method: GET, POST, DELETE (default: POST if body else GET).
-    :param timeout: Request timeout in seconds.
-    :return: Parsed JSON response if successful, None for 404, raises RuntimeError for other errors.
+    Public sync API: wraps the async paginator.
     """
-
-    global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT
-
-    # Use current config if args not provided
-    if max_retries is None:
-        max_retries = MAX_RETRIES
-    if retry_delay is None:
-        retry_delay = RETRY_DELAY
-    if timeout is None:
-        timeout = TIMEOUT  # allow tuple e.g. (5, 30)
-
-    url = f"{BASE_URL}{endpoint}"
-    headers = HEADERS.copy()
-    params = params or {}
-
-    if body:
-        headers["Content-Type"] = "application/json"
-
-    for attempt in range(max_retries):
-        try:
-            # Determine HTTP method
-            if method is None:
-                method_func = requests.post if body else requests.get
-                method_name = "POST" if body else "GET"
-            elif method.lower() == "delete":
-                method_func = requests.delete
-                method_name = "DELETE"
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
-
-            # Log outgoing request
-            full_url = requests.Request(method_name, url, params=params).prepare().url
-            logger.info(
-                f"Attempt {attempt + 1}/{max_retries}: {method_name} {full_url}"
-            )
-            logger.debug(f"Headers: {headers}")
-            if params:
-                logger.debug(f"Params: {params}")
-            if body:
-                logger.debug(f"Body: {json.dumps(body)}")
-
-            # Execute the request
-            response = method_func(
-                url,
-                params=params,
-                headers=headers,
-                data=json.dumps(body) if body else None,
-                timeout=timeout,
-            )
-
-            logger.debug(f"Response Status: {response.status_code}")
-            logger.debug(f"Response Body: {response.text}")
-
-            # Success
-            if response.status_code == HTTPStatus.OK:
-                return response.json()
-
-            # Extract error message
-            try:
-                error_data = response.json()
-                message = (
-                    error_data.get("errors", [{}])[0].get("message")
-                    or error_data.get("message")
-                    or response.text
-                )
-            except (ValueError, IndexError, KeyError):
-                message = response.text
-
-            # Handle known errors
-            if response.status_code == HTTPStatus.NOT_FOUND:
-                log_msg = f"404 Not Found: {full_url} — {message}"
-                logger.warning(log_msg)
-                if logging.WARNING >= EXCEPTION_LOG_LEVEL:
-                    raise RuntimeError(log_msg)
-                return None
-
-            # Server errors
-            elif response.status_code in {
-                HTTPStatus.INTERNAL_SERVER_ERROR,
-                HTTPStatus.BAD_GATEWAY,
-                HTTPStatus.SERVICE_UNAVAILABLE,
-                HTTPStatus.GATEWAY_TIMEOUT,
-            }:
-                logger.warning(
-                    f"{response.status_code} Server Error: {message} when calling {full_url} — Retrying ({attempt + 1}/{max_retries})"
-                )
-                time.sleep(retry_delay)
-
-            # Authorization errors
-            elif response.status_code in {
-                HTTPStatus.TOO_MANY_REQUESTS,
-                HTTPStatus.FORBIDDEN,
-                HTTPStatus.UNAUTHORIZED,
-            }:
-
-                if response.status_code == 429 and "maximum request count" in message:
-                    logger.warning(
-                        f"{response.status_code} Error: {message} when calling {full_url} — Retrying in 30 seconds ({attempt + 1}/{max_retries})"
-                    )
-                    time.sleep(30)
-                else:
-                    log_msg = f"{response.status_code} Error: {message} when calling {full_url}"
-                    logger.error(log_msg)
-                    if logging.ERROR >= EXCEPTION_LOG_LEVEL:
-                        raise RuntimeError(log_msg)
-                    return None
-
-            # Unknown errors
-            else:
-                log_msg = f"{response.status_code} Unknown Error: {message} when calling {full_url}"
-                logger.error(log_msg)
-                if logging.ERROR >= EXCEPTION_LOG_LEVEL:
-                    raise RuntimeError(f"HTTP {response.status_code}: {message}")
-
-        except requests.RequestException as e:
-            logger.error(f"Request exception: {e}")
-            if attempt == max_retries - 1:
-                raise RuntimeError(
-                    f"Maximum retry attempts reached when calling {full_url}."
-                ) from e
-
-    final_msg = f"Unhandled error or maximum retries exceeded when calling {full_url}."
-    logger.error(final_msg)
-    if logging.ERROR >= EXCEPTION_LOG_LEVEL:
-        raise RuntimeError(final_msg)
-
-    return None
+    return _run_blocking(
+        _request_wrapper_async(
+            endpoint,
+            params=params,
+            body=body,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            timeout=timeout,
+            method=method,
+        )
+    )
 
 
 def request_looper(
     endpoint,
     params=None,
     body=None,
-    handle_period=True,
     print_progress=False,
 ):
     """
-    Sends requests to the Soundcharts API, looping through time periods or paginated data as needed.
-
-    :param endpoint: The API endpoint (string).
-    :param params: Dictionary of query parameters (default: None).
-    :param body: JSON payload (default: None).
-    :param handle_period: Enable period splitting for long date ranges (default: True).
-    :param print_progress: Whether to print progress.
-    :return: Aggregated API response.
-    :raises: RuntimeError for rate-limiting or persistent server errors.
+    Public sync API: wraps the async paginator.
     """
-
-    def str_to_date(date_str):
-        return datetime.strptime(date_str, "%Y-%m-%d")
-
-    def str_date_add(date_str, amount):
-        new_date = str_to_date(date_str) + timedelta(days=amount)
-        return new_date.strftime("%Y-%m-%d")
-
-    def date_difference(start_date, end_date):
-        return (str_to_date(end_date) - str_to_date(start_date)).days
-
-    def is_empty(obj):
-        return obj is None or len(obj) == 0
-
-    def print_percentage(progress, total):
-        if total > 0:
-            percentage = min(round(progress * 100 / total, 2), 100)
-            print(f"\r{percentage}% done  ", end="", flush=True)
-            if progress >= total:
-                print()
-
-    # Setup
-    params = params.copy() if params else {}
-    results = {}
-    period = 90
-    loops = 1
-
-    # Limit handling
-    limit = params.get("limit")
-    if limit:
-        limit = int(limit)
-        params["limit"] = min(limit, 100)
-
-    # Period loop setup
-    start_date, end_date = params.get("startDate"), params.get("endDate")
-    if handle_period and end_date:
-        start_date = start_date or str_date_add(end_date, -period)
-        loops = ceil(date_difference(start_date, end_date) / period)
-
-    while period > 0:
-        # Adjust period boundaries
-        if handle_period and end_date:
-            params["endDate"] = end_date
-            period = min(date_difference(start_date, end_date), 90)
-            params["startDate"] = str_date_add(end_date, -period)
-            end_date = str_date_add(params["startDate"], -1)
-
-        next_get = endpoint
-        options = params.copy()
-        progress = 0
-
-        # Pagination loop
-        while next_get:
-            response = request_wrapper(next_get, options, body=body)
-
-            if is_empty(response):
-                break
-
-            if not results:
-                results = response
-            elif "items" in results and "items" in response:
-                merged_items = results.get("items", []) + response.get("items", [])
-                response["items"] = merged_items
-                results = response
-
-            next_get = results.get("page", {}).get("next")
-            options = None
-
-            # Progress
-            progress = len(results.get("items") or [])
-            total = limit or results.get("page", {}).get("total", progress) * loops
-            if "page" in results:
-                results["page"]["total"] = max(
-                    results["page"].get("total", 0), progress
-                )
-            if print_progress:
-                print_percentage(progress, total)
-
-            if limit and progress >= limit:
-                break
-
-        if not handle_period or limit and progress >= limit:
-            break
-        if start_date == end_date or date_difference(start_date, end_date) < 0:
-            break
-
-    if results.get("items") and limit:
-        results["items"] = results["items"][:limit]
-
-    return results
+    return _run_blocking(
+        _request_looper_async(
+            endpoint,
+            params=params,
+            body=body,
+            print_progress=print_progress,
+        )
+    )
 
 
 def sort_items_by_date(result, reverse=False, key="date"):

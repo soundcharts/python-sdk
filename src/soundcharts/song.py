@@ -6,10 +6,10 @@ class Song:
     def get_songs(offset=0, limit=100, body=None, print_progress=False):
         """
         You can sort songs in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like artist nationality, ISRC country, song genre, release date, attributes from lyrics analysis, etc. or performance metrics.
-        Available platfom/metricType combinations can be found in the documentation: https://doc.api.soundcharts.com/api/v2/doc/reference/path/song/get-songs
+        Available platfom/metricType combinations can be found in the documentation: https://developers.soundcharts.com/documentation/reference/song/get-songs
 
         :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
+        :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending spotify streams) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
         :return: JSON response or an empty dictionary.
@@ -154,7 +154,7 @@ class Song:
         :param song_uuid: A song UUID.
         :param platform: A social platform code. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param identifier: Optional song identifier.
         :return: JSON response or an empty dictionary.
         """
@@ -176,7 +176,7 @@ class Song:
         :param song_uuid: A song UUID.
         :param platform: A social platform code. Available values : spotify, deezer, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
@@ -276,7 +276,7 @@ class Song:
         :param platform: A playlist platform code. Default: spotify. Available platforms are listed in the Get platforms for playlist data endpoint. While the playlist count is available for all of these, playlist reach is only available for spotify, youtube, deezer, jiosaavn and boomplay.
         :param playlist_type: A playlist type. Available values are : 'all' or one of editorial, algorithmic, user.
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -310,7 +310,7 @@ class Song:
         :param radio_slugs: Optional radio slugs filter (comma separated).
         :param country_code: Optional country code filter (2 letters ISO 3166-2, full list on https://en.wikipedia.org/wiki/ISO_3166-2).
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
@@ -345,7 +345,7 @@ class Song:
         :param radio_slugs: Optional radio slugs filter (comma separated).
         :param country_code: Optional country code filter (2 letters ISO 3166-2, full list on https://en.wikipedia.org/wiki/ISO_3166-2).
         :param start_date: Optional period start date (format YYYY-MM-DD).
-        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty to use latest 90 days.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.

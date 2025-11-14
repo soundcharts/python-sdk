@@ -26,6 +26,7 @@ class SoundchartsClient:
         app_id,
         api_key,
         base_url="https://customer.api.soundcharts.com",
+        parallel_requests=1,
         max_retries=5,
         retry_delay=10,
         timeout=10,
@@ -40,6 +41,7 @@ class SoundchartsClient:
         :param app_id: Soundcharts App ID
         :param api_key: Soundcharts API Key
         :param base_url: Base URL for API. Default: production.
+        :param parallel_requests: How many queries can run in parallel. Default: 1.
         :param max_retries: Max number of retries in case of an error 500. Default: 5.
         :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
         :param console_log_level: The severity of issues written to the console. Default: logging.WARNING.
@@ -51,6 +53,7 @@ class SoundchartsClient:
             app_id,
             api_key,
             base_url,
+            parallel_requests,
             max_retries,
             retry_delay,
             timeout,
