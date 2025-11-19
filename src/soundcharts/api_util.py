@@ -284,7 +284,6 @@ async def _request_looper_async(endpoint, params=None, body=None, print_progress
         total_server = results.get("page", {}).get("total", len(items))
         total = limit or total_server
         total = min(total, total_server)
-        print(f"Total : {total}")
 
         if print_progress:
             print_percentage(len(items), total)
@@ -300,7 +299,6 @@ async def _request_looper_async(endpoint, params=None, body=None, print_progress
 
         page_size = params.get("limit", 100)
         extra_offsets = list(range(offset + page_size, total, page_size))
-        print(extra_offsets)
         if not extra_offsets:
             if limit:
                 results["items"] = items[:limit]
