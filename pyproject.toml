@@ -13,7 +13,12 @@ classifiers = [
 ]
 license = "GPL-3.0-only"
 license-files = ["LICEN[CS]E*"]
+dependencies = [
+    "requests>=2.25.1",
+    "aiohttp",
+]
 
 [project.urls]
 Homepage = "https://github.com/soundcharts/python-sdk"
+
 Issues = "https://github.com/soundcharts/python-sdk/issues"
