@@ -97,8 +97,15 @@ async def _request_wrapper_async(
     headers = dict(HEADERS or {})
 
     raw_params = params or {}
-    # Drop only None values; keep 0 / False / "" etc.
-    params = {k: v for k, v in raw_params.items() if v is not None}
+    params = {}
+
+    for k, v in (raw_params or {}).items():
+        if not v:
+            continue
+        if isinstance(v, bool):
+            params[k] = "true" if v else "false"
+            continue
+        params[k] = v
 
     if body:
         headers["Content-Type"] = "application/json"
@@ -237,13 +244,13 @@ async def _request_wrapper_async(
             await session.close()
 
 
-async def _request_looper_async(endpoint, params=None, body=None, print_progress=False):
-    """
-    Async paginator with parallel fetching.
-    """
-
-    global PARALLEL_REQUESTS
-
+async def _request_looper_async(
+    endpoint,
+    params=None,
+    body=None,
+    print_progress=False,
+    max_parallel_requests=5,
+):
     def print_percentage(progress, total):
         if total > 0:
             percentage = min(round(progress * 100 / total, 2), 100)
@@ -255,12 +262,12 @@ async def _request_looper_async(endpoint, params=None, body=None, print_progress
     results = {}
 
     # Limit / offset
-    raw_limit = params.pop("limit", None)  # remove it from params
+    raw_limit = params.pop("limit", None)
     if raw_limit is not None:
         limit = int(raw_limit)
-        params["limit"] = min(limit, 100)
+        params["limit"] = min(limit, 100)  # page size
     else:
-        limit = None  # no external limit, fetch everything
+        limit = None
 
     offset = int(params.get("offset") or 0)
     params["offset"] = max(offset, 0)
@@ -281,73 +288,102 @@ async def _request_looper_async(endpoint, params=None, body=None, print_progress
 
         items = list(results.get("items", []))
 
-        total_server = results.get("page", {}).get("total", len(items))
-        total = limit or total_server
-        total = min(total, total_server)
+        first_page = results.get("page", {}) or {}
+        total_server = first_page.get("total", len(items))
+        total_effective = (
+            min(total_server, limit) if limit is not None else total_server
+        )
 
         if print_progress:
-            print_percentage(len(items), total)
+            print_percentage(len(items), total_effective)
 
-        if len(items) >= total:
-            if limit:
-                results["items"] = items[:limit]
-            else:
-                results["items"] = items
-            if "page" in results:
-                results["page"]["total"] = total
+        # Are we fetching the full dataset or a limited slice?
+        fetched_all = (limit is None) or (limit >= total_server)
+
+        if len(items) >= total_effective:
+            if limit is not None:
+                items = items[:limit]
+            results["items"] = items
+
+            # pagination from first page (also "last fetched" here)
+            results["page"] = dict(first_page) if first_page else {}
+            results["page"]["total"] = total_server
+
+            if fetched_all:
+                results["page"]["next"] = None  # only if we truly fetched all
+
             return results
 
         page_size = params.get("limit", 100)
-        extra_offsets = list(range(offset + page_size, total, page_size))
+        extra_offsets = list(range(offset + page_size, total_effective, page_size))
         if not extra_offsets:
-            if limit:
-                results["items"] = items[:limit]
-            else:
-                results["items"] = items
-            if "page" in results:
-                results["page"]["total"] = total
+            if limit is not None:
+                items = items[:limit]
+            results["items"] = items
+
+            results["page"] = dict(first_page) if first_page else {}
+            results["page"]["total"] = total_server
+            if fetched_all:
+                results["page"]["next"] = None
+
             return results
 
-        sem = asyncio.Semaphore(PARALLEL_REQUESTS)
+        sem = asyncio.Semaphore(max_parallel_requests)
 
         async def fetch_page(off):
             page_params = params.copy()
             page_params["offset"] = off
-            page_params["limit"] = min(page_size, total - off)
+            page_params["limit"] = page_size
             async with sem:
-                return await _request_wrapper_async(
+                resp = await _request_wrapper_async(
                     endpoint,
                     page_params,
                     body=body,
                     session=session,
                 )
+            return off, resp
 
         tasks = [asyncio.create_task(fetch_page(o)) for o in extra_offsets]
 
+        last_page_offset = offset
+        last_page_block = first_page if first_page else {}
+
         for task in asyncio.as_completed(tasks):
-            response = await task
+            off, response = await task
             if not response or "items" not in response:
                 continue
 
-            page_items = response.get("items", [])
-            if not page_items or len(page_items) == 0:
-                continue
+            page_items = response.get("items") or []
+            if page_items:
+                items.extend(page_items)
 
-            items.extend(page_items)
+            page_block = response.get("page") or {}
+            if off >= last_page_offset and page_block:
+                last_page_offset = off
+                last_page_block = page_block
 
             if print_progress:
-                progress = min(len(items), total)
-                print_percentage(progress, total)
+                progress = min(len(items), total_effective)
+                print_percentage(progress, total_effective)
 
-            if len(items) >= total:
-                continue
+            if len(items) >= total_effective:
+                break
 
-        if limit:
+        if limit is not None:
             items = items[:limit]
 
         results["items"] = items
-        if "page" in results:
-            results["page"]["total"] = total
+
+        # Pagination = last logical page we fetched
+        results["page"] = dict(last_page_block) if last_page_block else {}
+        results["page"]["total"] = total_server  # always true total
+
+        if fetched_all:
+            # only overwrite next if we truly reached the server end
+            results["page"]["next"] = None
+
+        results["page"].setdefault("offset", last_page_offset)
+        results["page"].setdefault("limit", page_size)
 
         return results
 
