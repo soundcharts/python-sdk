@@ -35,6 +35,7 @@ MAX_RETRIES = 5
 RETRY_DELAY = 10
 TIMEOUT = 10
 EXCEPTION_LOG_LEVEL = logging.ERROR
+QUOTA_WARNING = [100, 1000, 10000, 100000]
 
 
 def setup(
@@ -153,6 +154,11 @@ async def _request_wrapper_async(
                     logger.debug(f"Response Status: {status}")
                     logger.debug(f"Response Body: {text}")
 
+                    # Remaining requests
+                    quota = response.headers.get("x-quota-remaining")
+                    if quota in QUOTA_WARNING:
+                        logger.warning(f"{quota} calls remaining.")
+
                     if status == HTTPStatus.OK:
                         try:
                             return await response.json()
@@ -201,11 +207,14 @@ async def _request_wrapper_async(
                             status == HTTPStatus.TOO_MANY_REQUESTS
                             and "maximum request count" in message
                         ):
+                            sleep_delay = (
+                                int(response.headers.get("x-ratelimit-reset", 0)) + 1
+                            )
                             logger.warning(
                                 f"{status} Error: {message} when calling {full_url} — "
-                                f"Retrying in 30 seconds ({attempt + 1}/{max_retries})"
+                                f"Retrying in {sleep_delay} seconds ({attempt + 1}/{max_retries})"
                             )
-                            await asyncio.sleep(30)
+                            await asyncio.sleep(sleep_delay)
                         else:
                             log_msg = (
                                 f"{status} Error: {message} when calling {full_url}"
