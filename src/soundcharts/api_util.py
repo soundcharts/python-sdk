@@ -72,7 +72,7 @@ def setup(
     logger.addHandler(log_file_handler)
 
 
-async def _request_wrapper_async(
+async def request_wrapper_async(
     endpoint,
     params=None,
     body=None,
@@ -253,7 +253,7 @@ async def _request_wrapper_async(
             await session.close()
 
 
-async def _request_looper_async(
+async def request_looper_async(
     endpoint,
     params=None,
     body=None,
@@ -285,7 +285,7 @@ async def _request_looper_async(
     async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
         # First page
         first_params = params.copy()
-        results = await _request_wrapper_async(
+        results = await request_wrapper_async(
             endpoint,
             first_params,
             body=body,
@@ -344,7 +344,7 @@ async def _request_looper_async(
             page_params["offset"] = off
             page_params["limit"] = page_size
             async with sem:
-                resp = await _request_wrapper_async(
+                resp = await request_wrapper_async(
                     endpoint,
                     page_params,
                     body=body,
@@ -411,7 +411,7 @@ def _run_blocking(coro):
         # Already in an event loop -> calling sync API from async code is a bad idea
         raise RuntimeError(
             "Soundcharts sync API called from an async context. "
-            "Use the async API directly instead."
+            "Use the async client instead."
         )
 
 
@@ -428,7 +428,7 @@ def request_wrapper(
     Public sync API: wraps the async paginator.
     """
     return _run_blocking(
-        _request_wrapper_async(
+        request_wrapper_async(
             endpoint,
             params=params,
             body=body,
@@ -450,7 +450,7 @@ def request_looper(
     Public sync API: wraps the async paginator.
     """
     return _run_blocking(
-        _request_looper_async(
+        request_looper_async(
             endpoint,
             params=params,
             body=body,

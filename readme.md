@@ -13,6 +13,7 @@ You will need a Soundcharts API subscription to use this package.
 - Easily pull data from Soundcharts' API.
 - Every endpoint from the documentation is available as a Python function.
   - For example, the "get audience" endpoint in the "playlist" category is accessible via `playlist.get_audience()`.
+- Synchronous and Asynchronous support.
 - Automatically loops through endpoints to get around API limitations, such as the limit of 100 items per request.
 - Configurable error handling.
 
@@ -22,14 +23,35 @@ You will need a Soundcharts API subscription to use this package.
 
 ## Usage
 
+**Synchronous Client**
+Best for standard scripts, Jupyter notebooks, or scheduled cron jobs.
+
 ```python
-from soundcharts.client import SoundchartsClient
+from soundcharts import SoundchartsClient
 
 sc = SoundchartsClient(app_id="your_app_id", api_key="your_api_key")
 
 # Example with Billie Eilish's UUID
 billie_metadata = sc.artist.get_artist_metadata("11e81bcc-9c1c-ce38-b96b-a0369fe50396")
 print(billie_metadata)
+```
+
+**Asynchronous Client**
+Recommended for high-performance applications, FastAPI, or when integrating with other asyncio libraries. This avoids blocking the event loop and allows for faster execution in concurrent environments.
+
+```python
+import asyncio
+from soundcharts import SoundchartsClientAsync
+
+async def main():
+    sc = SoundchartsClientAsync(app_id="your_app_id", api_key="your_api_key")
+
+    # Use 'await' for all API calls
+    billie_uuid = "11e81bcc-9c1c-ce38-b96b-a0369fe50396"
+    billie_metadata = await sc.artist.get_artist_metadata(billie_uuid)
+    print(billie_metadata)
+
+asyncio.run(main())
 ```
 
 ## Error handling

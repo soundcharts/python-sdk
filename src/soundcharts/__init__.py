@@ -1,3 +1,3 @@
-from .client import SoundchartsClient
+from .client import SoundchartsClient, SoundchartsClientAsync
 
-__all__ = ["SoundchartsClient"]
+__all__ = ["SoundchartsClient", "SoundchartsClientAsync"]

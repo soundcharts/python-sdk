@@ -1,4 +1,9 @@
-from .api_util import request_wrapper, request_looper
+from .api_util import (
+    request_wrapper,
+    request_looper,
+    request_wrapper_async,
+    request_looper_async,
+)
 
 
 class User:
@@ -48,4 +53,54 @@ class User:
 
         endpoint = f"/api/v2/user/{email}/blocklist/labels"
         result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+
+class UserAsync:
+    @staticmethod
+    async def get_blocklists_artists(email, offset=0, limit=100):
+        """
+        Get a dashboard user’s blocklists for artist profiles.
+
+        :param email: An url-encoded user email.
+        :param offset: Pagination offset.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        params = {"offset": offset, "limit": limit}
+
+        endpoint = f"/api/v2/user/{email}/blocklist/artists"
+        result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_blocklists_songs(email, offset=0, limit=100):
+        """
+        Get a dashboard user’s blocklists for song profiles.
+
+        :param email: An url-encoded user email.
+        :param offset: Pagination offset.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        params = {"offset": offset, "limit": limit}
+
+        endpoint = f"/api/v2/user/{email}/blocklist/songs"
+        result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_blocklists_labels(email, offset=0, limit=100):
+        """
+        Get a dashboard user’s blocklists for labels profiles.
+
+        :param email: An url-encoded user email.
+        :param offset: Pagination offset.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        params = {"offset": offset, "limit": limit}
+
+        endpoint = f"/api/v2/user/{email}/blocklist/labels"
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
