@@ -14,6 +14,8 @@ from .tiktok import Tiktok
 from .user import User
 from .mylibrary import MyLibrary
 from .referential import Referential
+from .publisher import Publisher
+from .work import Work
 
 
 class SoundchartsClient:
@@ -76,6 +78,8 @@ class SoundchartsClient:
         self.user = User()
         self.mylibrary = MyLibrary()
         self.referential = Referential()
+        self.publisher = Publisher()
+        self.work = Work()
 
         # Conditionally import 'test' submodule if test.py exists
         try:
@@ -86,8 +90,8 @@ class SoundchartsClient:
 
         # Conditionally import 'deprecated' submodule if deprecated.py exists
         try:
-            test_module = importlib.import_module("soundcharts.deprecated")
-            self.deprecated = test_module.Deprecated()
+            deprecated_module = importlib.import_module("soundcharts.deprecated")
+            self.deprecated = deprecated_module.Deprecated()
         except ModuleNotFoundError:
             self.deprecated = None
 

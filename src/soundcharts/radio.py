@@ -47,21 +47,6 @@ class Radio:
         return result if result is not None else {}
 
     @staticmethod
-    def get_radios_by_country(country_code, offset=0, limit=100):
-        """
-        Get the listing of all radios available on Soundcharts in a specific country.
-
-        :param country_code: Country code (2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2).
-        :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit. Default: 100.
-        :return: JSON response or an empty dictionary.
-        """
-        endpoint = f"/api/v2.22/radio/by-country/{country_code}"
-        params = {"offset": offset, "limit": limit}
-        result = request_looper(endpoint, params)
-        return result if result is not None else {}
-
-    @staticmethod
     def get_live_feed(radio_slug, start_date=None, end_date=None, offset=0, limit=100):
         """
         Get a specific radio’s live feed for a specific range of dates.

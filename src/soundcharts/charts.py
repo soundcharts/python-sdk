@@ -4,51 +4,6 @@ from .api_util import request_wrapper, request_looper, sort_items_by_date
 class Charts:
 
     @staticmethod
-    def get_radio_ranking(
-        platform="instagram",
-        metric_type="followers",
-        sort_by="total",
-        period="month",
-        radio_country_code=None,
-        min_value=None,
-        max_value=None,
-        min_change=None,
-        max_change=None,
-        token=None,
-    ):
-        """
-        Get a listing of radios, ranked by a specific platform metric.
-
-        :param platform: A platform code. Global, instagram, facebook, tiktok, twitter, youtube. Default: instagram.
-        :param metric_type: fan, followers, reach. Default: followers.
-        :param sort_by: total, change, percent. Default: total.
-        :param period: month, quarter. Default: month.
-        :param radio_country_code: Radio nationality (Country code of 2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2)
-        :param min_value: Total audience (min value)
-        :param max_value: Total audience (max value)
-        :param min_change: Change percentage audience (min value)
-        :param max_change: Change percentage audience (max value)
-        :param token: Page token
-        :return: JSON response or an empty dictionary.
-        """
-
-        endpoint = f"/api/v2/top-song/{platform}/{metric_type}"
-
-        params = {
-            "sortBy": sort_by,
-            "period": period,
-            "songCountryCode": radio_country_code,
-            "minValue": min_value,
-            "maxValue": max_value,
-            "minChange": min_change,
-            "maxChange": max_change,
-            "token": token,
-        }
-
-        result = request_wrapper(endpoint, params)
-        return result if result is not None else {}
-
-    @staticmethod
     def get_song_chart_list_by_platform(
         platform, country_code=None, offset=0, limit=100
     ):
