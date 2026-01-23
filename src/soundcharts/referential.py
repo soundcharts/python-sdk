@@ -9,63 +9,81 @@ from .api_util import (
 class Referential:
 
     @staticmethod
-    def get_platforms():
+    def get_platforms(offset=0, limit=100):
         """
         Get all available platforms on Soundcharts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    def get_platforms_for_audience_data():
+    def get_platforms_for_audience_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts gets audience data for artists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms/social"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    def get_platforms_for_streaming_data():
+    def get_platforms_for_streaming_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts gets streaming data for artists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms/streaming"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    def get_platforms_for_song_charts():
+    def get_platforms_for_song_charts(offset=0, limit=100):
         """
         Get a listing of platforms for which Soundcharts stores song charts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/chart/song/platforms"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    def get_platforms_for_album_charts():
+    def get_platforms_for_album_charts(offset=0, limit=100):
         """
         Get a listing of platforms for which Soundcharts stores album charts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/chart/album/platforms"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    def get_platforms_for_playlist_data():
+    def get_platforms_for_playlist_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts tracks playlists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/playlist/platforms"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -126,14 +144,17 @@ class Referential:
         return result if result is not None else {}
 
     @staticmethod
-    def get_label_types():
+    def get_label_types(offset=0, limit=100):
         """
         Get all label types.
         This endpoint is useful for the Get Songs endpoint.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/label-types"
-        result = request_wrapper(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -174,63 +195,81 @@ class Referential:
 class ReferentialAsync:
 
     @staticmethod
-    async def get_platforms():
+    async def get_platforms(offset=0, limit=100):
         """
         Get all available platforms on Soundcharts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_platforms_for_audience_data():
+    async def get_platforms_for_audience_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts gets audience data for artists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms/social"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_platforms_for_streaming_data():
+    async def get_platforms_for_streaming_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts gets streaming data for artists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/platforms/streaming"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_platforms_for_song_charts():
+    async def get_platforms_for_song_charts(offset=0, limit=100):
         """
         Get a listing of platforms for which Soundcharts stores song charts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/chart/song/platforms"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_platforms_for_album_charts():
+    async def get_platforms_for_album_charts(offset=0, limit=100):
         """
         Get a listing of platforms for which Soundcharts stores album charts.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/chart/album/platforms"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_platforms_for_playlist_data():
+    async def get_platforms_for_playlist_data(offset=0, limit=100):
         """
         Get all platforms for which Soundcharts tracks playlists.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/playlist/platforms"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -256,7 +295,7 @@ class ReferentialAsync:
         """
         endpoint = "/api/v2/artist/genres"
         params = {"genre": genre, "sortOrder": sort_order}
-        result = await request_wrapper_async(endpoint, params)
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -287,18 +326,21 @@ class ReferentialAsync:
         """
         endpoint = "/api/v2/referential/song/genres"
         params = {"genre": genre, "sortOrder": sort_order}
-        result = await request_wrapper_async(endpoint, params)
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_label_types():
+    async def get_label_types(offset=0, limit=100):
         """
         Get all label types.
         This endpoint is useful for the Get Songs endpoint.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = "/api/v2/referential/label-types"
-        result = await request_wrapper_async(endpoint)
+        params = {"offset": offset, "limit": limit}
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
