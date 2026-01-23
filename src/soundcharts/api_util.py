@@ -299,6 +299,8 @@ async def request_looper_async(
             return results
 
         items = list(results.get("items", []))
+        pages = {offset: items}
+        fetched_count = len(items)
 
         first_page = results.get("page", {}) or {}
         total_server = first_page.get("total", len(items))
@@ -355,32 +357,65 @@ async def request_looper_async(
                 )
             return off, resp
 
-        tasks = [asyncio.create_task(fetch_page(o)) for o in extra_offsets]
+        tasks = {
+            asyncio.create_task(fetch_page(o)): o for o in extra_offsets
+        }
+
 
         last_page_offset = offset
         last_page_block = first_page if first_page else {}
 
         for task in asyncio.as_completed(tasks):
-            off, response = await task
+            try:
+                off, response = await task
+            except Exception as exc:
+                # If one task fails, cancel all other tasks
+                logger.error(
+                    "Request task failed for %s offset=%s: %s",
+                    endpoint,
+                    tasks.get(task, "unknown"),
+                    exc,
+                )
+                pending = [item for item in tasks if not item.done()]
+                for pending_task in pending:
+                    pending_task.cancel()
+                if pending:
+                    await asyncio.gather(*pending, return_exceptions=True)
+                break
             if not response or "items" not in response:
                 continue
 
             page_items = response.get("items") or []
             if page_items:
-                items.extend(page_items)
+                pages[off] = page_items
 
             page_block = response.get("page") or {}
             if off >= last_page_offset and page_block:
                 last_page_offset = off
                 last_page_block = page_block
 
+
+            if page_items:
+                fetched_count += len(page_items)
+
             if print_progress:
-                progress = min(len(items), total_effective)
+                progress = min(fetched_count, total_effective)
                 print_percentage(progress, total_effective)
 
-            if len(items) >= total_effective:
+            if fetched_count >= total_effective:
                 break
 
+        # Make sure to cancel all tasks which aren't done
+        pending = [task for task in tasks if not task.done()]
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
+
+        ordered_items = []
+        for off in sorted(pages):
+            ordered_items.extend(pages[off])
+        items = ordered_items
         if limit is not None:
             items = items[:limit]
 

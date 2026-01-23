@@ -169,18 +169,20 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
-    def get_similar_artists(artist_uuid, offset=0, limit=20):
+    def get_similar_artists(artist_uuid, offset=0, limit=40):
         """
         Get similar artists ("Fans Also Like") from Spotify.
 
         :param artist_uuid: An artist UUID.
-        :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param offset: Pagination offset.  Default: 0.
+        :param limit: Number of results to retrieve.  None: no limit.  Default:
+            40.
+
         :return: JSON response or an empty dictionary.
         """
 
         endpoint = f"/api/v2/artist/{artist_uuid}/related"
-        params = {"offset": offset, "limit": min(limit, 20)}
+        params = {"offset": offset, "limit": limit}
         result = request_wrapper(endpoint, params)
         return result if result is not None else {}
 
@@ -844,18 +846,20 @@ class ArtistAsync:
         return result if result is not None else {}
 
     @staticmethod
-    async def get_similar_artists(artist_uuid, offset=0, limit=20):
+    async def get_similar_artists(artist_uuid, offset=0, limit=40):
         """
         Get similar artists ("Fans Also Like") from Spotify.
 
         :param artist_uuid: An artist UUID.
-        :param offset: Pagination offset. Default: 0.
-        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param offset: Pagination offset.  Default: 0.
+        :param limit: Number of results to retrieve.  None: no limit.  Default:
+            40.
+
         :return: JSON response or an empty dictionary.
         """
 
         endpoint = f"/api/v2/artist/{artist_uuid}/related"
-        params = {"offset": offset, "limit": min(limit, 20)}
+        params = {"offset": offset, "limit": limit}
         result = await request_wrapper_async(endpoint, params)
         return result if result is not None else {}
 
