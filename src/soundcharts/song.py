@@ -152,7 +152,13 @@ class Song:
 
     @staticmethod
     def get_audience(
-        song_uuid, platform="spotify", start_date=None, end_date=None, identifier=None
+        song_uuid,
+        platform="spotify",
+        start_date=None,
+        end_date=None,
+        identifier=None,
+        offset=0,
+        limit=100,
     ):
         """
         Get the value of streams/plays/favorites/views for a specific song.
@@ -162,6 +168,8 @@ class Song:
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param identifier: Optional song identifier.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
 
@@ -170,12 +178,21 @@ class Song:
             "startDate": start_date,
             "endDate": end_date,
             "identifier": identifier,
+            "offset": offset,
+            "limit": limit,
         }
         result = request_looper(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
-    def get_popularity(song_uuid, platform="spotify", start_date=None, end_date=None):
+    def get_popularity(
+        song_uuid,
+        platform="spotify",
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
         """
         Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
 
@@ -183,10 +200,17 @@ class Song:
         :param platform: A social platform code. Available values : spotify, deezer, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
-        params = {"startDate": start_date, "endDate": end_date}
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
         result = request_looper(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
 
@@ -535,7 +559,13 @@ class SongAsync:
 
     @staticmethod
     async def get_audience(
-        song_uuid, platform="spotify", start_date=None, end_date=None, identifier=None
+        song_uuid,
+        platform="spotify",
+        start_date=None,
+        end_date=None,
+        identifier=None,
+        offset=0,
+        limit=100,
     ):
         """
         Get the value of streams/plays/favorites/views for a specific song.
@@ -545,6 +575,8 @@ class SongAsync:
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param identifier: Optional song identifier.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
 
@@ -553,13 +585,20 @@ class SongAsync:
             "startDate": start_date,
             "endDate": end_date,
             "identifier": identifier,
+            "offset": offset,
+            "limit": limit,
         }
         result = await request_looper_async(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
 
     @staticmethod
     async def get_popularity(
-        song_uuid, platform="spotify", start_date=None, end_date=None
+        song_uuid,
+        platform="spotify",
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
     ):
         """
         Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
@@ -568,10 +607,17 @@ class SongAsync:
         :param platform: A social platform code. Available values : spotify, deezer, tidal. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
-        params = {"startDate": start_date, "endDate": end_date}
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
         result = await request_looper_async(endpoint, params)
         return {} if result is None else sort_items_by_date(result, True)
 
