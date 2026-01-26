@@ -1,5 +1,5 @@
 from .api_util import (
-    request_wrapper,
+    request_looper,
     request_looper,
     request_wrapper_async,
     request_looper_async,
@@ -18,7 +18,7 @@ class Referential:
         """
         endpoint = "/api/v2/referential/platforms"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -31,7 +31,7 @@ class Referential:
         """
         endpoint = "/api/v2/referential/platforms/social"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -44,7 +44,7 @@ class Referential:
         """
         endpoint = "/api/v2/referential/platforms/streaming"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -57,7 +57,7 @@ class Referential:
         """
         endpoint = "/api/v2/chart/song/platforms"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -70,7 +70,7 @@ class Referential:
         """
         endpoint = "/api/v2/chart/album/platforms"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -83,7 +83,7 @@ class Referential:
         """
         endpoint = "/api/v2/playlist/platforms"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -109,7 +109,7 @@ class Referential:
         """
         endpoint = "/api/v2/artist/genres"
         params = {"genre": genre, "sortOrder": sort_order}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -140,7 +140,7 @@ class Referential:
         """
         endpoint = "/api/v2/referential/song/genres"
         params = {"genre": genre, "sortOrder": sort_order}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -154,7 +154,7 @@ class Referential:
         """
         endpoint = "/api/v2/referential/label-types"
         params = {"offset": offset, "limit": limit}
-        result = request_wrapper(endpoint, params)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
