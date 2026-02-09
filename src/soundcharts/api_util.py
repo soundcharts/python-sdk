@@ -271,8 +271,12 @@ async def request_looper_async(
     params=None,
     body=None,
     print_progress=False,
-    max_parallel_requests=5,
+    max_parallel_requests=None,
 ):
+    global PARALLEL_REQUESTS
+    if max_parallel_requests is None:
+        max_parallel_requests = PARALLEL_REQUESTS
+
     def print_percentage(progress, total):
         if total > 0:
             percentage = min(round(progress * 100 / total, 2), 100)
