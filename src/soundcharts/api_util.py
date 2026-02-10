@@ -63,7 +63,6 @@ def setup(
     EXCEPTION_LOG_LEVEL = exception_log_level
 
     logger.handlers.clear()
-    logger.propagate = False
     logger.setLevel(min(console_log_level, file_log_level))
 
     console_handler.setLevel(console_log_level)
