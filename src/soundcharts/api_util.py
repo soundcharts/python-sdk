@@ -245,7 +245,7 @@ async def request_wrapper_async(
                             raise RuntimeError(f"HTTP {status}: {message}")
 
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                logger.exception(f"Request exception: {e}")
+                logger.warning(e)
                 if attempt >= attempts:
                     raise RuntimeError(
                         f"Maximum retry attempts reached when calling {full_url}."
