@@ -3,6 +3,7 @@ import logging
 from .api_util import setup as api_setup
 from .search import Search, SearchAsync
 from .artist import Artist, ArtistAsync
+from .collaborator import Collaborator, CollaboratorAsync
 from .song import Song, SongAsync
 from .album import Album, AlbumAsync
 from .charts import Charts, ChartsAsync
@@ -68,6 +69,7 @@ class SoundchartsClient:
         # Initialize submodules
         self.search = Search()
         self.artist = Artist()
+        self.collaborator = Collaborator()
         self.song = Song()
         self.album = Album()
         self.charts = Charts()
@@ -144,6 +146,7 @@ class SoundchartsClientAsync:
         # Initialize submodules
         self.search = SearchAsync()
         self.artist = ArtistAsync()
+        self.collaborator = CollaboratorAsync()
         self.song = SongAsync()
         self.album = AlbumAsync()
         self.charts = ChartsAsync()

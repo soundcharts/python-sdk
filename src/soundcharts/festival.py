@@ -65,6 +65,20 @@ class Festival:
         return result if result is not None else {}
 
     @staticmethod
+    def get_festival_by_platform_id(platform, identifier):
+        """
+        Get Soundcharts’ UUID & festival metadata.
+
+        :param platform: A platform code.
+        :param identifier: An album platform identifier.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/festival/by-platform/{platform}/{identifier}"
+        result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_ids(festival_uuid, platform=None, offset=0, limit=100):
         """
         Get platform URLs belonging to this festival.
@@ -175,6 +189,20 @@ class FestivalAsync:
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/festival/{festival_uuid}"
+        result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_festival_by_platform_id(platform, identifier):
+        """
+        Get Soundcharts’ UUID & festival metadata.
+
+        :param platform: A platform code.
+        :param identifier: An album platform identifier.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/festival/by-platform/{platform}/{identifier}"
         result = await request_wrapper_async(endpoint)
         return result if result is not None else {}
 
