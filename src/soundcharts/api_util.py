@@ -131,9 +131,7 @@ async def request_wrapper_async(
     try:
         for attempt in range(1, attempts + 1):
             try:
-                logger.info(
-                    f"Attempt {attempt}/{attempts}: {method_name} {full_url}"
-                )
+                logger.info(f"Attempt {attempt}/{attempts}: {method_name} {full_url}")
                 logger.debug("Headers: %s", headers)
                 if params:
                     logger.debug("Params: %s", params)
@@ -266,7 +264,7 @@ async def request_wrapper_async(
             await session.close()
 
 
-async def request_looper_async(
+async def request_looper_async_old(
     endpoint,
     params=None,
     body=None,
@@ -372,10 +370,7 @@ async def request_looper_async(
                 )
             return off, resp
 
-        tasks = {
-            asyncio.create_task(fetch_page(o)): o for o in extra_offsets
-        }
-
+        tasks = {asyncio.create_task(fetch_page(o)): o for o in extra_offsets}
 
         last_page_offset = offset
         last_page_block = first_page if first_page else {}
@@ -411,7 +406,6 @@ async def request_looper_async(
                 last_page_offset = off
                 last_page_block = page_block
 
-
             if page_items:
                 fetched_count += len(page_items)
 
@@ -433,6 +427,238 @@ async def request_looper_async(
         for off in sorted(pages):
             ordered_items.extend(pages[off])
         items = ordered_items
+        if limit is not None:
+            items = items[:limit]
+
+        results["items"] = items
+
+        # Pagination = last logical page we fetched
+        results["page"] = dict(last_page_block) if last_page_block else {}
+        results["page"]["total"] = total_server  # always true total
+
+        if fetched_all:
+            # only overwrite next if we truly reached the server end
+            results["page"]["next"] = None
+
+        results["page"].setdefault("offset", last_page_offset)
+        results["page"].setdefault("limit", page_size)
+        if last_quota_remaining is not None:
+            results["quota_remaining"] = last_quota_remaining
+
+        return results
+
+
+async def request_looper_async(
+    endpoint,
+    params=None,
+    body=None,
+    print_progress=False,
+    max_parallel_requests=None,
+):
+    global PARALLEL_REQUESTS
+    if max_parallel_requests is None:
+        max_parallel_requests = PARALLEL_REQUESTS
+
+    def print_percentage(progress, total):
+        if total > 0:
+            percentage = min(round(progress * 100 / total, 2), 100)
+            print(f"\r{percentage}% done  ", end="", flush=True)
+            if progress >= total:
+                print()
+
+    params = params.copy() if params else {}
+    results = {}
+
+    # Limit / offset
+    raw_limit = params.pop("limit", None)
+    if raw_limit is not None:
+        limit = int(raw_limit)
+        params["limit"] = min(limit, 100)  # page size
+    else:
+        limit = None
+
+    initial_offset = int(params.get("offset") or 0)
+    params["offset"] = max(initial_offset, 0)
+    page_size = params.get("limit", 100)
+
+    timeout_cfg = aiohttp.ClientTimeout(total=TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+        # First page
+        first_params = params.copy()
+        results = await request_wrapper_async(
+            endpoint,
+            first_params,
+            body=body,
+            session=session,
+        )
+
+        if not results or "items" not in results:
+            return results
+
+        items = list(results.get("items", []))
+        fetched_count = len(items)
+        last_quota_remaining = results.get("quota_remaining")
+
+        first_page = results.get("page", {}) or {}
+        total_server = first_page.get("total", len(items))
+        total_effective = (
+            min(total_server, limit) if limit is not None else total_server
+        )
+
+        if print_progress:
+            print_percentage(fetched_count, total_effective)
+
+        # Are we fetching the full dataset or a limited slice?
+        fetched_all = (limit is None) or (limit >= total_server)
+
+        if fetched_count >= total_effective:
+            if limit is not None:
+                items = items[:limit]
+            results["items"] = items
+
+            # pagination from first page (also "last fetched" here)
+            results["page"] = dict(first_page) if first_page else {}
+            results["page"]["total"] = total_server
+
+            if fetched_all:
+                results["page"]["next"] = None  # only if we truly fetched all
+
+            return results
+
+        sem = asyncio.Semaphore(max_parallel_requests)
+
+        # ---------------------------------------------------------
+        # Cursor & Batching Setup
+        # ---------------------------------------------------------
+        BATCH_SIZE = 50000
+        has_cursor = "cursor" in first_page or "cursor" in params
+        current_cursor = params.get("cursor")
+
+        all_items = list(items)
+        last_page_block = first_page if first_page else {}
+        last_page_offset = initial_offset
+        current_offset = initial_offset + page_size
+
+        while fetched_count < total_effective:
+            # Determine max offset to reach in this batch iteration
+            if has_cursor:
+                end_offset = min(
+                    BATCH_SIZE, current_offset + (total_effective - fetched_count)
+                )
+            else:
+                end_offset = total_effective
+
+            extra_offsets = list(range(current_offset, end_offset, page_size))
+
+            if not extra_offsets:
+                # Reached batch limits, jump to next batch window if using cursors
+                if has_cursor:
+                    next_cursor = last_page_block.get("cursor")
+                    if not next_cursor or next_cursor == current_cursor:
+                        break  # No new cursor to proceed with
+                    current_cursor = next_cursor
+                    current_offset = 0
+                    continue
+                else:
+                    break
+
+            pages_batch = {}
+            tasks = {}
+
+            async def fetch_page(off, cursor_val):
+                page_params = params.copy()
+                page_params["offset"] = off
+                page_params["limit"] = page_size
+                if cursor_val is not None:
+                    page_params["cursor"] = cursor_val
+                else:
+                    page_params.pop("cursor", None)
+
+                async with sem:
+                    resp = await request_wrapper_async(
+                        endpoint,
+                        page_params,
+                        body=body,
+                        session=session,
+                    )
+                return off, resp
+
+            for o in extra_offsets:
+                tasks[asyncio.create_task(fetch_page(o, current_cursor))] = o
+
+            highest_off_in_batch = -1
+            last_page_in_batch = {}
+
+            # Execute parallel requests for the current batch window
+            for task in asyncio.as_completed(tasks):
+                try:
+                    off, response = await task
+                except Exception as exc:
+                    logger.error(
+                        "Request task failed for %s offset=%s: %s",
+                        endpoint,
+                        tasks.get(task, "unknown"),
+                        exc,
+                    )
+                    pending = [item for item in tasks if not item.done()]
+                    for pending_task in pending:
+                        pending_task.cancel()
+                    if pending:
+                        await asyncio.gather(*pending, return_exceptions=True)
+                    break
+
+                if not response or "items" not in response:
+                    continue
+
+                page_items = response.get("items") or []
+                if page_items:
+                    pages_batch[off] = page_items
+                    fetched_count += len(page_items)
+
+                if "quota_remaining" in response:
+                    last_quota_remaining = response.get("quota_remaining")
+
+                page_block = response.get("page") or {}
+                # Capture the response data of the highest offset to grab the next cursor later
+                if off >= highest_off_in_batch and page_block:
+                    highest_off_in_batch = off
+                    last_page_in_batch = page_block
+
+                if print_progress:
+                    progress = min(fetched_count, total_effective)
+                    print_percentage(progress, total_effective)
+
+            # Cleanup any pending tasks if loop broke early (e.g., due to exception)
+            pending = [task for task in tasks if not task.done()]
+            for task in pending:
+                task.cancel()
+            if pending:
+                await asyncio.gather(*pending, return_exceptions=True)
+
+            # Append items sequentially for this batch
+            for off in sorted(pages_batch):
+                all_items.extend(pages_batch[off])
+
+            # Update master trackers
+            if last_page_in_batch:
+                last_page_block = last_page_in_batch
+                last_page_offset = highest_off_in_batch
+
+            if fetched_count >= total_effective:
+                break
+
+            # If strictly using cursors, extract new cursor from the last page of this batch
+            if has_cursor:
+                next_cursor = last_page_block.get("cursor")
+                if not next_cursor:
+                    break
+                current_cursor = next_cursor
+                current_offset = 0  # Reset offset relative to the new cursor
+            else:
+                break  # Standard offset behavior finished
+
+        # Finalize and compile results
+        items = all_items
         if limit is not None:
             items = items[:limit]
 
