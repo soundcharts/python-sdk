@@ -14,7 +14,7 @@ You will need a Soundcharts API subscription to use this package.
 - Every endpoint from the documentation is available as a Python function.
   - For example, the "get audience" endpoint in the "playlist" category is accessible via `playlist.get_audience()`.
 - Synchronous and Asynchronous support.
-- Automatically loops through endpoints to get around API limitations, such as the limit of 100 items per request.
+- Automatically loops through endpoints to get around API limitations, such as the limit of 100 items per request or cursors on premium endpoints.
 - Configurable error handling.
 
 ## Installation
