@@ -103,6 +103,26 @@ class Album:
         return result if result is not None else {}
 
     @staticmethod
+    def get_popularity(album_uuid, platform="spotify", start_date=None, end_date=None):
+        """
+        Get daily values for album popularity.
+
+        :param album_uuid: An album UUID.
+        :param platform: A platform code. Available values : spotify, deezer. Default: spotify.
+        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param end_date: Optional period end date (format YYYY-MM-DD).
+        :return: JSON response or an empty dictionary.
+        """
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+        }
+
+        endpoint = f"/api/v2/album/{album_uuid}/popularity/{platform}"
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_tracklisting(album_uuid):
         """
         Get an album's tracklisting using their UUID.
@@ -241,6 +261,28 @@ class AlbumAsync:
         }
 
         endpoint = f"/api/v2/album/{album_uuid}/audience/{platform}"
+        result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_popularity(
+        album_uuid, platform="spotify", start_date=None, end_date=None
+    ):
+        """
+        Get daily values for album popularity.
+
+        :param album_uuid: An album UUID.
+        :param platform: A platform code. Available values : spotify, deezer. Default: spotify.
+        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param end_date: Optional period end date (format YYYY-MM-DD).
+        :return: JSON response or an empty dictionary.
+        """
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+        }
+
+        endpoint = f"/api/v2/album/{album_uuid}/popularity/{platform}"
         result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
