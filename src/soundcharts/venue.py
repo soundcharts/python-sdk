@@ -65,6 +65,20 @@ class Venue:
         return result if result is not None else {}
 
     @staticmethod
+    def get_venue_by_platform_id(platform, identifier):
+        """
+        Get Soundcharts’ UUID & venue metadata.
+
+        :param platform: A platform code.
+        :param identifier: An album platform identifier.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/venue/by-platform/{platform}/{identifier}"
+        result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_ids(venue_uuid, platform=None, offset=0, limit=100):
         """
         Get platform URLs belonging to this venue.
@@ -173,6 +187,20 @@ class VenueAsync:
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/venue/{venue_uuid}"
+        result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_venue_by_platform_id(platform, identifier):
+        """
+        Get Soundcharts’ UUID & venue metadata.
+
+        :param platform: A platform code.
+        :param identifier: An album platform identifier.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/venue/by-platform/{platform}/{identifier}"
         result = await request_wrapper_async(endpoint)
         return result if result is not None else {}
 
