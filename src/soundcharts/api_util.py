@@ -9,7 +9,6 @@ from urllib.parse import urlencode
 
 # Logger setup
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(
@@ -64,6 +63,7 @@ def setup(
     EXCEPTION_LOG_LEVEL = exception_log_level
 
     logger.handlers.clear()
+    logger.setLevel(min(console_log_level, file_log_level))
 
     console_handler.setLevel(console_log_level)
     logger.addHandler(console_handler)
