@@ -1,21 +1,22 @@
 import importlib.util
 import logging
 from .api_util import setup as api_setup
-from .search import Search, SearchAsync
-from .artist import Artist, ArtistAsync
-from .collaborator import Collaborator, CollaboratorAsync
-from .song import Song, SongAsync
 from .album import Album, AlbumAsync
+from .artist import Artist, ArtistAsync
 from .charts import Charts, ChartsAsync
-from .playlist import Playlist, PlaylistAsync
-from .radio import Radio, RadioAsync
+from .collaborator import Collaborator, CollaboratorAsync
+from .datafeed import DataFeed, DataFeedAsync
+from .distributor import Distributor, DistributorAsync
+from .favorite import Favorite, FavoriteAsync
 from .festival import Festival, FestivalAsync
-from .venue import Venue, VenueAsync
-from .tiktok import Tiktok, TiktokAsync
-from .user import User, UserAsync
-from .mylibrary import MyLibrary, MyLibraryAsync
-from .referential import Referential, ReferentialAsync
+from .playlist import Playlist, PlaylistAsync
 from .publisher import Publisher, PublisherAsync
+from .radio import Radio, RadioAsync
+from .referential import Referential, ReferentialAsync
+from .search import Search, SearchAsync
+from .song import Song, SongAsync
+from .usage_quotas import UsageQuotas, UsageQuotasAsync
+from .venue import Venue, VenueAsync
 from .work import Work, WorkAsync
 
 
@@ -67,21 +68,22 @@ class SoundchartsClient:
         )
 
         # Initialize submodules
-        self.search = Search()
-        self.artist = Artist()
-        self.collaborator = Collaborator()
-        self.song = Song()
         self.album = Album()
+        self.artist = Artist()
         self.charts = Charts()
-        self.playlist = Playlist()
-        self.radio = Radio()
+        self.collaborator = Collaborator()
+        self.data_feed = DataFeed()
+        self.distributor = Distributor()
+        self.favorite = Favorite()
         self.festival = Festival()
-        self.venue = Venue()
-        self.tiktok = Tiktok()
-        self.user = User()
-        self.mylibrary = MyLibrary()
-        self.referential = Referential()
+        self.playlist = Playlist()
         self.publisher = Publisher()
+        self.radio = Radio()
+        self.referential = Referential()
+        self.search = Search()
+        self.song = Song()
+        self.usage_quotas = UsageQuotas()
+        self.venue = Venue()
         self.work = Work()
 
         # Conditionally import 'test' submodule if test.py exists
@@ -144,21 +146,22 @@ class SoundchartsClientAsync:
         )
 
         # Initialize submodules
-        self.search = SearchAsync()
-        self.artist = ArtistAsync()
-        self.collaborator = CollaboratorAsync()
-        self.song = SongAsync()
         self.album = AlbumAsync()
+        self.artist = ArtistAsync()
         self.charts = ChartsAsync()
-        self.playlist = PlaylistAsync()
-        self.radio = RadioAsync()
+        self.collaborator = CollaboratorAsync()
+        self.datafeed = DataFeedAsync()
+        self.distributor = DistributorAsync()
+        self.favorite = FavoriteAsync()
         self.festival = FestivalAsync()
-        self.venue = VenueAsync()
-        self.tiktok = TiktokAsync()
-        self.user = UserAsync()
-        self.mylibrary = MyLibraryAsync()
-        self.referential = ReferentialAsync()
+        self.playlist = PlaylistAsync()
         self.publisher = PublisherAsync()
+        self.radio = RadioAsync()
+        self.referential = ReferentialAsync()
+        self.search = SearchAsync()
+        self.song = SongAsync()
+        self.usage_quotas = UsageQuotasAsync()
+        self.venue = VenueAsync()
         self.work = WorkAsync()
 
         # Conditionally import 'test' submodule if test.py exists

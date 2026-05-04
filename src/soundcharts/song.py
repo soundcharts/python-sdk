@@ -151,6 +151,87 @@ class Song:
         return result if result is not None else {}
 
     @staticmethod
+    def get_soundcharts_score(
+        song_uuid,
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
+        """
+        Get the song’s Soundcharts scores.
+
+        :param song_uuid: A song UUID.
+        :param start_date: Optional period start date (format YYYY-MM-DD). If not provided, the start date defaults to 30 days before the end date.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/soundcharts/score"
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = request_looper(endpoint, params)
+        return {} if result is None else sort_items_by_date(result, True)
+
+    @staticmethod
+    def get_local_streaming_audience(
+        song_uuid,
+        platform="youtube",
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
+        """
+        Get local values for song YouTube views.
+
+        :param song_uuid: A song UUID.
+        :param platform: A social platform code. Default: youtube.
+        :param start_date: Optional period start date (format YYYY-MM-DD). If not provided, the start date defaults to 30 days before the end date.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param identifier: Optional song identifier.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/streaming/{platform}"
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = request_looper(endpoint, params)
+        return {} if result is None else sort_items_by_date(result, True)
+
+    @staticmethod
+    def get_current_stats(
+        song_uuid,
+        period=7,
+    ):
+        """
+        Get all the current score, streaming, and popularity stats for a song.
+
+        :param song_uuid: A song UUID.
+        :param period: A period, in days. Used to compute metrics evolution. Default: 7.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/current/stats"
+        params = {
+            "period": period,
+        }
+        result = request_wrapper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_audience(
         song_uuid,
         platform="spotify",
@@ -555,6 +636,87 @@ class SongAsync:
             "sortOrder": sort_order,
         }
         result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_soundcharts_score(
+        song_uuid,
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
+        """
+        Get the song’s Soundcharts scores.
+
+        :param song_uuid: A song UUID.
+        :param start_date: Optional period start date (format YYYY-MM-DD). If not provided, the start date defaults to 30 days before the end date.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/soundcharts/score"
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = await request_looper_async(endpoint, params)
+        return {} if result is None else sort_items_by_date(result, True)
+
+    @staticmethod
+    async def get_local_streaming_audience(
+        song_uuid,
+        platform="youtube",
+        start_date=None,
+        end_date=None,
+        offset=0,
+        limit=100,
+    ):
+        """
+        Get local values for song YouTube views.
+
+        :param song_uuid: A song UUID.
+        :param platform: A social platform code. Default: youtube.
+        :param start_date: Optional period start date (format YYYY-MM-DD). If not provided, the start date defaults to 30 days before the end date.
+        :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param identifier: Optional song identifier.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/streaming/{platform}"
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+        }
+        result = await request_looper_async(endpoint, params)
+        return {} if result is None else sort_items_by_date(result, True)
+
+    @staticmethod
+    async def get_current_stats(
+        song_uuid,
+        period=7,
+    ):
+        """
+        Get all the current score, streaming, and popularity stats for a song.
+
+        :param song_uuid: A song UUID.
+        :param period: A period, in days. Used to compute metrics evolution. Default: 7.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/current/stats"
+        params = {
+            "period": period,
+        }
+        result = await request_wrapper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
