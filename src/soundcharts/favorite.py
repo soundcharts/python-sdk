@@ -10,7 +10,7 @@ from .api_util import (
 class Favorite:
 
     @staticmethod
-    def get_artist_favorites(offset=0, limit=20):
+    def get_favorite_artists(offset=0, limit=20):
         """
         Retrieve the artists configured for high-frequency data updates.
 
@@ -55,7 +55,7 @@ class Favorite:
 class FavoriteAsync:
 
     @staticmethod
-    async def get_artist_favorites(offset=0, limit=20):
+    async def get_favorite_artists(offset=0, limit=20):
         """
         Retrieve the artists configured for high-frequency data updates.
 
