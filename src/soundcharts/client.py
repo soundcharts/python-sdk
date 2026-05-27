@@ -27,9 +27,13 @@ class SoundchartsClient:
 
     def __init__(
         self,
-        app_id,
-        api_key,
+        app_id=None,
+        api_key=None,
+        client_id=None,
+        client_secret=None,
+        team_id=None,
         base_url="https://customer.api.soundcharts.com",
+        auth_url="https://account.soundcharts.dev",
         parallel_requests=5,
         max_retries=5,
         retry_delay=10,
@@ -42,29 +46,30 @@ class SoundchartsClient:
         Initialize the Soundcharts client. Use the logging python library to specify the logging level.
         Logging levels : DEBUG, INFO, WARNING, ERROR, CRITICAL.
 
-        :param app_id: Soundcharts App ID
-        :param api_key: Soundcharts API Key
-        :param base_url: Base URL for API. Default: production.
-        :param parallel_requests: How many queries can run in parallel. Default: 5.
-        :param max_retries: Max number of retries in case of an error 500. Default: 5.
-        :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
-        :param console_log_level: The severity of issues written to the console. Default: logging.WARNING.
-        :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
-        :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
+        Provide either (client_id, client_secret) for OAuth 2.1 or (app_id, api_key) for legacy auth.
         """
         self.base_url = base_url
 
+        if not ((app_id and api_key) or (client_id and client_secret)):
+            raise ValueError(
+                "SDK configuration invalid: Provide either OAuth credentials or legacy API keys."
+            )
+
         api_setup(
-            app_id,
-            api_key,
-            base_url,
-            parallel_requests,
-            max_retries,
-            retry_delay,
-            timeout,
-            console_log_level,
-            file_log_level,
-            exception_log_level,
+            app_id=app_id,
+            api_key=api_key,
+            client_id=client_id,
+            client_secret=client_secret,
+            team_id=team_id,
+            base_url=base_url,
+            auth_url=auth_url,
+            parallel_requests=parallel_requests,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            timeout=timeout,
+            console_log_level=console_log_level,
+            file_log_level=file_log_level,
+            exception_log_level=exception_log_level,
         )
 
         # Initialize submodules
@@ -99,14 +104,18 @@ class SoundchartsClient:
 
 class SoundchartsClientAsync:
     """
-    Main client for interacting with the Soundcharts API.
+    Main async client for interacting with the Soundcharts API.
     """
 
     def __init__(
         self,
-        app_id,
-        api_key,
+        app_id=None,
+        api_key=None,
+        client_id=None,
+        client_secret=None,
+        team_id=None,
         base_url="https://customer.api.soundcharts.com",
+        auth_url="https://account.soundcharts.dev",
         parallel_requests=5,
         max_retries=5,
         retry_delay=10,
@@ -116,33 +125,31 @@ class SoundchartsClientAsync:
         exception_log_level=logging.ERROR,
     ):
         """
-        Initialize the Soundcharts client. Use the logging python library to specify the logging level.
-        Logging levels : DEBUG, INFO, WARNING, ERROR, CRITICAL.
-
-        :param app_id: Soundcharts App ID
-        :param api_key: Soundcharts API Key
-        :param base_url: Base URL for API. Default: production.
-        :param parallel_requests: How many queries can run in parallel. Default: 5.
-        :param max_retries: Max number of retries in case of an error 500. Default: 5.
-        :param retry_delay: Time in seconds between retries for a 500 error. Default: 10.
-        :param console_log_level: The severity of issues written to the console. Default: logging.WARNING.
-        :param file_log_level: The severity of issues written to the logging file. Default: logging.WARNING.
-        :param exception_log_level: The severity of issues that cause exceptions. Default: logging.ERROR.
+        Initialize the Soundcharts client.
+        Provide either (client_id, client_secret) for OAuth 2.1 or (app_id, api_key) for legacy auth.
         """
-
         self.base_url = base_url
 
+        if not ((app_id and api_key) or (client_id and client_secret)):
+            raise ValueError(
+                "SDK configuration invalid: Provide either OAuth credentials or legacy API keys."
+            )
+
         api_setup(
-            app_id,
-            api_key,
-            base_url,
-            parallel_requests,
-            max_retries,
-            retry_delay,
-            timeout,
-            console_log_level,
-            file_log_level,
-            exception_log_level,
+            app_id=app_id,
+            api_key=api_key,
+            client_id=client_id,
+            client_secret=client_secret,
+            team_id=team_id,
+            base_url=base_url,
+            auth_url=auth_url,
+            parallel_requests=parallel_requests,
+            max_retries=max_retries,
+            retry_delay=retry_delay,
+            timeout=timeout,
+            console_log_level=console_log_level,
+            file_log_level=file_log_level,
+            exception_log_level=exception_log_level,
         )
 
         # Initialize submodules
