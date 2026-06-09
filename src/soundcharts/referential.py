@@ -130,6 +130,23 @@ class Referential:
         return result if result is not None else {}
 
     @staticmethod
+    def get_cities_for_venue_festival(
+        country_code, search_city=None, offset=0, limit=100
+    ):
+        """
+        For a specific country, get a listing of cities you can use to retrieve concerts, festivals and venues.
+        :param country_code: Country code (2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2).
+        :param search_city: Optional: search city filter.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/referential/venue/cities/{country_code}"
+        params = {"searchCity": search_city, "offset": offset, "limit": limit}
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_song_genres(genre="all", sort_order="asc"):
         """
         Get all song genres and the associated subgenres.
@@ -313,6 +330,23 @@ class ReferentialAsync:
         endpoint = f"/api/v2/top-artist/referential/cities/{country_code}"
         params = {"searchCity": search_city, "offset": offset, "limit": limit}
         result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_cities_for_venue_festival(
+        country_code, search_city=None, offset=0, limit=100
+    ):
+        """
+        For a specific country, get a listing of cities you can use to retrieve concerts, festivals and venues.
+        :param country_code: Country code (2 letters ISO 3166-2, example: 'US', full list on https://en.wikipedia.org/wiki/ISO_3166-2).
+        :param search_city: Optional: search city filter.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/referential/venue/cities/{country_code}"
+        params = {"searchCity": search_city, "offset": offset, "limit": limit}
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
