@@ -219,7 +219,7 @@ async def request_wrapper_async(
                 ) as response:
                     status = response.status
                     text = await response.text()
-
+                    logger.debug(f"Full url: {response.url}")
                     logger.debug("Response Status: %s", status)
                     logger.debug("Response Body: %s", text)
 

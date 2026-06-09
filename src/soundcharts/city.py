@@ -31,7 +31,7 @@ class City:
             "offset": offset,
             "limit": limit,
         }
-        result = request_looper(endpoint)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -46,7 +46,7 @@ class City:
         params = {
             "cityKey": city_key,
         }
-        result = request_looper(endpoint)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -61,7 +61,7 @@ class City:
         params = {
             "cityKey": city_key,
         }
-        result = request_looper(endpoint)
+        result = request_looper(endpoint, params)
         return result if result is not None else {}
 
 
@@ -89,7 +89,7 @@ class CityAsync:
             "offset": offset,
             "limit": limit,
         }
-        result = await request_looper(endpoint)
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -104,7 +104,7 @@ class CityAsync:
         params = {
             "cityKey": city_key,
         }
-        result = await request_looper(endpoint)
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod
@@ -119,5 +119,5 @@ class CityAsync:
         params = {
             "cityKey": city_key,
         }
-        result = await request_looper(endpoint)
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
