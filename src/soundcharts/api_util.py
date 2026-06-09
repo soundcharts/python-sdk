@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import json
 import logging
+import time
 from requests.structures import CaseInsensitiveDict
 from http import HTTPStatus
 from datetime import datetime
@@ -37,11 +38,34 @@ TIMEOUT = 10
 EXCEPTION_LOG_LEVEL = logging.ERROR
 QUOTA_WARNING = [100, 1000, 10000, 100000]
 
+# OAuth Config and State
+CLIENT_ID = None
+CLIENT_SECRET = None
+TEAM_ID = None
+AUTH_URL = None
+ACCESS_TOKEN = None
+TOKEN_EXPIRES_AT = 0.0
+
+# Store asyncio Locks per-loop to prevent cross-loop execution errors
+# when users mix sync and async method calls.
+_token_locks = {}
+
+
+def _get_token_lock():
+    loop = asyncio.get_running_loop()
+    if loop not in _token_locks:
+        _token_locks[loop] = asyncio.Lock()
+    return _token_locks[loop]
+
 
 def setup(
-    app_id,
-    api_key,
+    app_id=None,
+    api_key=None,
+    client_id=None,
+    client_secret=None,
+    team_id=None,
     base_url="https://customer.api.soundcharts.com",
+    auth_url="https://account.soundcharts.dev",
     parallel_requests=5,
     max_retries=5,
     retry_delay=10,
@@ -51,12 +75,24 @@ def setup(
     exception_log_level=logging.ERROR,
 ):
     global HEADERS, BASE_URL, PARALLEL_REQUESTS, MAX_RETRIES, RETRY_DELAY, TIMEOUT, EXCEPTION_LOG_LEVEL
+    global CLIENT_ID, CLIENT_SECRET, TEAM_ID, AUTH_URL
+
+    # OAuth globals
+    CLIENT_ID = client_id
+    CLIENT_SECRET = client_secret
+    TEAM_ID = team_id
+    AUTH_URL = auth_url.rstrip("/")
+    BASE_URL = base_url.rstrip("/")
 
     HEADERS = CaseInsensitiveDict()
-    HEADERS["x-app-id"] = app_id
-    HEADERS["x-api-key"] = api_key
 
-    BASE_URL = base_url
+    # Only load legacy auth keys into global headers if OAuth isn't being used.
+    if not client_id:
+        if app_id:
+            HEADERS["x-app-id"] = app_id
+        if api_key:
+            HEADERS["x-api-key"] = api_key
+
     PARALLEL_REQUESTS = parallel_requests
     MAX_RETRIES = max_retries
     RETRY_DELAY = retry_delay
@@ -72,6 +108,27 @@ def setup(
     logger.addHandler(log_file_handler)
 
 
+async def _fetch_oauth_token_async(session: aiohttp.ClientSession):
+    """Executes the strict OAuth client_credentials flow using Basic Auth."""
+    global ACCESS_TOKEN, TOKEN_EXPIRES_AT, CLIENT_ID, CLIENT_SECRET, TEAM_ID, AUTH_URL
+
+    token_url = f"{AUTH_URL}/oauth/token"
+    payload = {"grant_type": "client_credentials"}
+    if TEAM_ID:
+        payload["team_id"] = str(TEAM_ID)
+
+    # Basic Auth handles the URL-encoding of credentials automatically
+    auth = aiohttp.BasicAuth(CLIENT_ID, CLIENT_SECRET)
+
+    async with session.post(token_url, data=payload, auth=auth) as resp:
+        resp.raise_for_status()
+        token_data = await resp.json()
+        ACCESS_TOKEN = token_data["access_token"]
+        expires_in = token_data.get("expires_in", 3600)
+        # Safety buffer
+        TOKEN_EXPIRES_AT = time.time() + expires_in - 45
+
+
 async def request_wrapper_async(
     endpoint,
     params=None,
@@ -83,9 +140,10 @@ async def request_wrapper_async(
     session: aiohttp.ClientSession | None = None,
 ):
     """
-    Async HTTP wrapper with retries.
+    Async HTTP wrapper with retries and integrated OAuth token management.
     """
     global HEADERS, BASE_URL, MAX_RETRIES, RETRY_DELAY, TIMEOUT
+    global CLIENT_ID, ACCESS_TOKEN, TOKEN_EXPIRES_AT
 
     if max_retries is None:
         max_retries = MAX_RETRIES
@@ -95,7 +153,6 @@ async def request_wrapper_async(
         timeout = TIMEOUT
 
     url = f"{BASE_URL}{endpoint}"
-    headers = dict(HEADERS or {})
 
     raw_params = params or {}
     params = {}
@@ -107,9 +164,6 @@ async def request_wrapper_async(
             params[k] = "true" if v else "false"
             continue
         params[k] = v
-
-    if body:
-        headers["Content-Type"] = "application/json"
 
     if method is None:
         method_name = "POST" if body else "GET"
@@ -126,10 +180,28 @@ async def request_wrapper_async(
         session = aiohttp.ClientSession(timeout=timeout_cfg)
         owns_session = True
 
-    # Otherwise max_retries=0 will result in no attempts
     attempts = max_retries + 1
     try:
         for attempt in range(1, attempts + 1):
+
+            # 1. State/Header Injection per-attempt
+            headers = dict(HEADERS or {})
+            if body:
+                headers["Content-Type"] = "application/json"
+
+            # Evaluate OAuth token state inside the retry loop
+            if CLIENT_ID:
+                if not ACCESS_TOKEN or time.time() >= TOKEN_EXPIRES_AT:
+                    lock = _get_token_lock()
+                    async with lock:
+                        if not ACCESS_TOKEN or time.time() >= TOKEN_EXPIRES_AT:
+                            await _fetch_oauth_token_async(session)
+
+                # Apply strictly overriding Bearer token
+                headers["Authorization"] = f"Bearer {ACCESS_TOKEN}"
+                headers.pop("x-app-id", None)
+                headers.pop("x-api-key", None)
+
             try:
                 logger.info(f"Attempt {attempt}/{attempts}: {method_name} {full_url}")
                 logger.debug("Headers: %s", headers)
@@ -147,11 +219,10 @@ async def request_wrapper_async(
                 ) as response:
                     status = response.status
                     text = await response.text()
-
+                    logger.debug(f"Full url: {response.url}")
                     logger.debug("Response Status: %s", status)
                     logger.debug("Response Body: %s", text)
 
-                    # Remaining requests
                     quota_raw = response.headers.get("x-quota-remaining")
                     quota_remaining = None
                     if quota_raw is not None:
@@ -172,7 +243,6 @@ async def request_wrapper_async(
                             payload.setdefault("quota_remaining", quota_remaining)
                         return payload
 
-                    # Extract error message
                     try:
                         error_data = await response.json()
                         message = (
@@ -183,7 +253,6 @@ async def request_wrapper_async(
                     except Exception:
                         message = text
 
-                    # 404
                     if status == HTTPStatus.NOT_FOUND:
                         log_msg = f"404 Not Found: {full_url} — {message}"
                         logger.warning(log_msg)
@@ -191,7 +260,6 @@ async def request_wrapper_async(
                             raise RuntimeError(log_msg)
                         return None
 
-                    # 5xx
                     elif status in {
                         HTTPStatus.BAD_GATEWAY,
                         HTTPStatus.SERVICE_UNAVAILABLE,
@@ -205,12 +273,23 @@ async def request_wrapper_async(
                         )
                         await asyncio.sleep(retry_delay)
 
-                    # Auth / rate limit
                     elif status in {
                         HTTPStatus.TOO_MANY_REQUESTS,
                         HTTPStatus.FORBIDDEN,
                         HTTPStatus.UNAUTHORIZED,
                     }:
+                        # Graceful OAuth Recovery Mechanism
+                        if status == HTTPStatus.UNAUTHORIZED and CLIENT_ID:
+                            logger.warning(
+                                "401 Unauthorized encountered. Forcing token flush."
+                            )
+                            TOKEN_EXPIRES_AT = (
+                                0.0  # Force token refresh on next retry iteration
+                            )
+                            if attempt >= attempts:
+                                break
+                            continue  # Immediately loop and refresh token without sleeping
+
                         if (
                             status == HTTPStatus.TOO_MANY_REQUESTS
                             and "maximum request count" in message
@@ -285,11 +364,10 @@ async def request_looper_async(
     params = params.copy() if params else {}
     results = {}
 
-    # Limit / offset
     raw_limit = params.pop("limit", None)
     if raw_limit is not None:
         limit = int(raw_limit)
-        params["limit"] = min(limit, 100)  # page size
+        params["limit"] = min(limit, 100)
     else:
         limit = None
 
@@ -299,7 +377,6 @@ async def request_looper_async(
 
     timeout_cfg = aiohttp.ClientTimeout(total=TIMEOUT)
     async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
-        # First page
         first_params = params.copy()
         results = await request_wrapper_async(
             endpoint,
@@ -324,7 +401,6 @@ async def request_looper_async(
         if print_progress:
             print_percentage(fetched_count, total_effective)
 
-        # Are we fetching the full dataset or a limited slice?
         fetched_all = (limit is None) or (limit >= total_server)
 
         if fetched_count >= total_effective:
@@ -332,20 +408,16 @@ async def request_looper_async(
                 items = items[:limit]
             results["items"] = items
 
-            # pagination from first page (also "last fetched" here)
             results["page"] = dict(first_page) if first_page else {}
             results["page"]["total"] = total_server
 
             if fetched_all:
-                results["page"]["next"] = None  # only if we truly fetched all
+                results["page"]["next"] = None
 
             return results
 
         sem = asyncio.Semaphore(max_parallel_requests)
 
-        # ---------------------------------------------------------
-        # Cursor & Batching Setup
-        # ---------------------------------------------------------
         BATCH_SIZE = 50000
         has_cursor = "cursor" in first_page or "cursor" in params
         current_cursor = params.get("cursor")
@@ -356,7 +428,6 @@ async def request_looper_async(
         current_offset = initial_offset + page_size
 
         while fetched_count < total_effective:
-            # Determine max offset to reach in this batch iteration
             if has_cursor:
                 end_offset = min(
                     BATCH_SIZE, current_offset + (total_effective - fetched_count)
@@ -367,11 +438,10 @@ async def request_looper_async(
             extra_offsets = list(range(current_offset, end_offset, page_size))
 
             if not extra_offsets:
-                # Reached batch limits, jump to next batch window if using cursors
                 if has_cursor:
                     next_cursor = last_page_block.get("cursor")
                     if not next_cursor or next_cursor == current_cursor:
-                        break  # No new cursor to proceed with
+                        break
                     current_cursor = next_cursor
                     current_offset = 0
                     continue
@@ -405,7 +475,6 @@ async def request_looper_async(
             highest_off_in_batch = -1
             last_page_in_batch = {}
 
-            # Execute parallel requests for the current batch window
             for task in asyncio.as_completed(tasks):
                 try:
                     off, response = await task
@@ -435,7 +504,6 @@ async def request_looper_async(
                     last_quota_remaining = response.get("quota_remaining")
 
                 page_block = response.get("page") or {}
-                # Capture the response data of the highest offset to grab the next cursor later
                 if off >= highest_off_in_batch and page_block:
                     highest_off_in_batch = off
                     last_page_in_batch = page_block
@@ -444,18 +512,15 @@ async def request_looper_async(
                     progress = min(fetched_count, total_effective)
                     print_percentage(progress, total_effective)
 
-            # Cleanup any pending tasks if loop broke early (e.g., due to exception)
             pending = [task for task in tasks if not task.done()]
             for task in pending:
                 task.cancel()
             if pending:
                 await asyncio.gather(*pending, return_exceptions=True)
 
-            # Append items sequentially for this batch
             for off in sorted(pages_batch):
                 all_items.extend(pages_batch[off])
 
-            # Update master trackers
             if last_page_in_batch:
                 last_page_block = last_page_in_batch
                 last_page_offset = highest_off_in_batch
@@ -463,29 +528,24 @@ async def request_looper_async(
             if fetched_count >= total_effective:
                 break
 
-            # If strictly using cursors, extract new cursor from the last page of this batch
             if has_cursor:
                 next_cursor = last_page_block.get("cursor")
                 if not next_cursor:
                     break
                 current_cursor = next_cursor
-                current_offset = 0  # Reset offset relative to the new cursor
+                current_offset = 0
             else:
-                break  # Standard offset behavior finished
+                break
 
-        # Finalize and compile results
         items = all_items
         if limit is not None:
             items = items[:limit]
 
         results["items"] = items
-
-        # Pagination = last logical page we fetched
         results["page"] = dict(last_page_block) if last_page_block else {}
-        results["page"]["total"] = total_server  # always true total
+        results["page"]["total"] = total_server
 
         if fetched_all:
-            # only overwrite next if we truly reached the server end
             results["page"]["next"] = None
 
         results["page"].setdefault("offset", last_page_offset)
@@ -497,17 +557,11 @@ async def request_looper_async(
 
 
 def _run_blocking(coro):
-    """
-    Run an async coroutine in a blocking way.
-    Used to provide a sync public API on top of async internals.
-    """
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        # No running loop -> normal script -> safe
         return asyncio.run(coro)
     else:
-        # Already in an event loop -> calling sync API from async code is a bad idea
         raise RuntimeError(
             "Soundcharts sync API called from an async context. "
             "Use the async client instead."
@@ -523,9 +577,6 @@ def request_wrapper(
     timeout=None,
     method=None,
 ):
-    """
-    Public sync API: wraps the async paginator.
-    """
     return _run_blocking(
         request_wrapper_async(
             endpoint,
@@ -545,9 +596,6 @@ def request_looper(
     body=None,
     print_progress=False,
 ):
-    """
-    Public sync API: wraps the async paginator.
-    """
     return _run_blocking(
         request_looper_async(
             endpoint,
