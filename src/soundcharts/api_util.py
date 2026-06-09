@@ -125,7 +125,7 @@ async def _fetch_oauth_token_async(session: aiohttp.ClientSession):
         token_data = await resp.json()
         ACCESS_TOKEN = token_data["access_token"]
         expires_in = token_data.get("expires_in", 3600)
-        # Apply 45 second safety buffer
+        # Safety buffer
         TOKEN_EXPIRES_AT = time.time() + expires_in - 45
 
 
