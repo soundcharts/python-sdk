@@ -49,11 +49,11 @@ class Collaborator:
         return result if result is not None else {}
 
     @staticmethod
-    def get_ids(festival_uuid, platform=None, offset=0, limit=100):
+    def get_ids(collaborator_uuid, platform=None, offset=0, limit=100):
         """
-        Get platform URLs belonging to this festival.
+        Get platform URLs belonging to this collaborator.
 
-        :param festival_uuid: A festival uuid.
+        :param collaborator_uuid: A collaborator uuid.
         :param platform: An optional platform code.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
@@ -61,7 +61,23 @@ class Collaborator:
         """
         params = {"platform": platform, "offset": offset, "limit": limit}
 
-        endpoint = f"/api/v2/festival/{festival_uuid}/identifiers"
+        endpoint = f"/api/v2/collaborator/{collaborator_uuid}/identifiers"
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+    
+    @staticmethod
+    def get_songs(collaborator_uuid, offset=0, limit=100):
+        """
+        Get songs by a specific collaborator.
+
+        :param collaborator_uuid: A collaborator uuid.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        params = {"offset": offset, "limit": limit}
+
+        endpoint = f"/api/v2/collaborator/{collaborator_uuid}/songs"
         result = request_looper(endpoint, params)
         return result if result is not None else {}
 
@@ -108,11 +124,11 @@ class CollaboratorAsync:
         return result if result is not None else {}
 
     @staticmethod
-    async def get_ids(festival_uuid, platform=None, offset=0, limit=100):
+    async def get_ids(collaborator_uuid, platform=None, offset=0, limit=100):
         """
-        Get platform URLs belonging to this festival.
+        Get platform URLs belonging to this collaborator.
 
-        :param festival_uuid: A festival uuid.
+        :param collaborator_uuid: A collaborator uuid.
         :param platform: An optional platform code.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
@@ -120,6 +136,22 @@ class CollaboratorAsync:
         """
         params = {"platform": platform, "offset": offset, "limit": limit}
 
-        endpoint = f"/api/v2/festival/{festival_uuid}/identifiers"
+        endpoint = f"/api/v2/collaborator/{collaborator_uuid}/identifiers"
         result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+    
+    @staticmethod
+    async def get_songs(collaborator_uuid, offset=0, limit=100):
+        """
+        Get songs by a specific collaborator.
+
+        :param collaborator_uuid: A festival uuid.
+        :param offset: Pagination offset. Default: 0.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :return: JSON response or an empty dictionary.
+        """
+        params = {"offset": offset, "limit": limit}
+
+        endpoint = f"/api/v2/collaborator/{collaborator_uuid}/songs"
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}

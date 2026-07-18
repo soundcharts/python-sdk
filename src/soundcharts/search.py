@@ -62,6 +62,10 @@ class Search:
     @staticmethod
     def search_venue_by_name(term, offset=0, limit=20):
         return search_by_type("venue", term, offset, limit)
+    
+    @staticmethod
+    def search_label_by_name(term, offset=0, limit=20):
+        return search_by_type("label", term, offset, limit)
 
     @staticmethod
     def get_soundcharts_url_from_platform_url(platform_url):
@@ -104,6 +108,10 @@ class SearchAsync:
     @staticmethod
     async def search_venue_by_name(term, offset=0, limit=20):
         return await search_by_type_async("venue", term, offset, limit)
+    
+    @staticmethod
+    async def search_label_by_name(term, offset=0, limit=20):
+        return await search_by_type_async("label", term, offset, limit)
 
     @staticmethod
     async def get_soundcharts_url_from_platform_url(platform_url):
