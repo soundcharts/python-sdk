@@ -4,6 +4,7 @@ from .api_util import setup as api_setup
 from .album import Album, AlbumAsync
 from .artist import Artist, ArtistAsync
 from .charts import Charts, ChartsAsync
+from .city import City, CityAsync
 from .collaborator import Collaborator, CollaboratorAsync
 from .datafeed import DataFeed, DataFeedAsync
 from .distributor import Distributor, DistributorAsync
@@ -77,6 +78,7 @@ class SoundchartsClient:
         self.album = Album()
         self.artist = Artist()
         self.charts = Charts()
+        self.city = City()
         self.collaborator = Collaborator()
         self.data_feed = DataFeed()
         self.distributor = Distributor()
@@ -158,6 +160,7 @@ class SoundchartsClientAsync:
         self.album = AlbumAsync()
         self.artist = ArtistAsync()
         self.charts = ChartsAsync()
+        self.city = CityAsync()
         self.collaborator = CollaboratorAsync()
         self.datafeed = DataFeedAsync()
         self.distributor = DistributorAsync()

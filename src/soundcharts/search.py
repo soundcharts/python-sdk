@@ -44,6 +44,14 @@ class Search:
         return search_by_type("artist", term, offset, limit)
 
     @staticmethod
+    def search_album_by_name(term, offset=0, limit=20):
+        return search_by_type_async("album", term, offset, limit)
+
+    @staticmethod
+    def search_collaborator_by_name(term, offset=0, limit=20):
+        return search_by_type_async("collaborator", term, offset, limit)
+
+    @staticmethod
     def search_song_by_name(term, offset=0, limit=20):
         return search_by_type("song", term, offset, limit)
 
@@ -88,6 +96,14 @@ class SearchAsync:
     @staticmethod
     async def search_artist_by_name(term, offset=0, limit=20):
         return await search_by_type_async("artist", term, offset, limit)
+
+    @staticmethod
+    async def search_album_by_name(term, offset=0, limit=20):
+        return await search_by_type_async("album", term, offset, limit)
+
+    @staticmethod
+    async def search_collaborator_by_name(term, offset=0, limit=20):
+        return await search_by_type_async("collaborator", term, offset, limit)
 
     @staticmethod
     async def search_song_by_name(term, offset=0, limit=20):
