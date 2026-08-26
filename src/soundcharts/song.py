@@ -489,6 +489,19 @@ class Song:
 
         result = request_wrapper(endpoint, body=body)
         return result if result is not None else {}
+    
+    @staticmethod
+    def get_related_tracks(song_uuid):
+        """
+        Retrieves all available versions of a specific song.
+
+        :param song_uuid: A song UUID.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/related"
+        result = request_wrapper(endpoint)
+        return result if result is not None else {}
 
 
 class SongAsync:
@@ -976,4 +989,17 @@ class SongAsync:
         body = {"urls": links}
 
         result = await request_wrapper_async(endpoint, body=body)
+        return result if result is not None else {}
+    
+    @staticmethod
+    async def get_related_tracks(song_uuid):
+        """
+        Retrieves all available versions of a specific song.
+
+        :param song_uuid: A song UUID.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/song/{song_uuid}/related"
+        result = await request_wrapper(endpoint)
         return result if result is not None else {}

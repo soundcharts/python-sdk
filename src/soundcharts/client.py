@@ -10,6 +10,7 @@ from .datafeed import DataFeed, DataFeedAsync
 from .distributor import Distributor, DistributorAsync
 from .favorite import Favorite, FavoriteAsync
 from .festival import Festival, FestivalAsync
+from .label import Label, LabelAsync
 from .playlist import Playlist, PlaylistAsync
 from .publisher import Publisher, PublisherAsync
 from .radio import Radio, RadioAsync
@@ -83,6 +84,7 @@ class SoundchartsClient:
         self.distributor = Distributor()
         self.favorite = Favorite()
         self.festival = Festival()
+        self.label = Label()
         self.playlist = Playlist()
         self.publisher = Publisher()
         self.radio = Radio()
@@ -164,6 +166,7 @@ class SoundchartsClientAsync:
         self.distributor = DistributorAsync()
         self.favorite = FavoriteAsync()
         self.festival = FestivalAsync()
+        self.label = LabelAsync()
         self.playlist = PlaylistAsync()
         self.publisher = PublisherAsync()
         self.radio = RadioAsync()

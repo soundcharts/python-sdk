@@ -4,7 +4,7 @@ A Python package for interacting with the Soundcharts API.
 
 ## API Documentation
 
-Full documentation of the API is available here: [Soundcharts API Documentation](https://developers.soundcharts.com/documentation/getting-started)
+Full documentation of the API is available here: [Soundcharts API Documentation](https://developers.soundcharts.com/api/getting-started)
 
 You will need a Soundcharts API subscription to use this package.
 
@@ -92,3 +92,23 @@ response = sc.artist.get_radio_spins(
     billie, start_date="2025-01-01", end_date="2025-03-31", limit=None
 )
 ```
+
+# Other ways to access Soundcharts data
+
+## MCP 
+
+Soundcharts also provides an **MCP (Model Context Protocol) server**, allowing AI assistants such as ChatGPT, Claude Desktop, Cursor, VS Code, and other MCP-compatible clients to access Soundcharts data directly.
+
+With the MCP server, you can query artists, tracks, playlists, charts, radio airplay, social metrics, and the rest of the Soundcharts API using natural language, without writing API calls manually.
+
+See the MCP documentation for installation instructions and supported clients: [Soundcharts MCP Documentation](https://developers.soundcharts.com/mcp)
+
+## Data feeds
+
+If you need to ingest Soundcharts data at scale, we also provide datafeeds that deliver datasets directly to your infrastructure.
+
+Datafeeds are ideal for data warehouses, BI platforms, analytics pipelines, and machine learning workflows, allowing you to receive continuously updated data without polling the API.
+
+Learn more: [Soundcharts Data feeds Documentation](https://developers.soundcharts.com/documentation/feed)
+
+
