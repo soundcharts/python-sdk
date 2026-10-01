@@ -113,6 +113,18 @@ class Referential:
         return result if result is not None else {}
 
     @staticmethod
+    def get_top_artist_metrics(sort_order="asc"):
+        """
+        Get all artist metrics available in the "Get artists" endpoint.
+        :param sort_order: Sort order. Available values are : asc, desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-artist/referential/metrics"
+        params = {"sortOrder": sort_order}
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_cities_for_artist_ranking(
         country_code, search_city=None, offset=0, limit=100
     ):
@@ -312,6 +324,18 @@ class ReferentialAsync:
         """
         endpoint = "/api/v2/artist/genres"
         params = {"genre": genre, "sortOrder": sort_order}
+        result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_top_artist_metrics(sort_order="asc"):
+        """
+        Get all artist metrics available in the "Get artists" endpoint.
+        :param sort_order: Sort order. Available values are : asc, desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-artist/referential/metrics"
+        params = {"sortOrder": sort_order}
         result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 

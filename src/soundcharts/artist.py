@@ -431,6 +431,19 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
+    def unlock_audience_report(artist_uuid, platform):
+        """
+        Unlocks and generates a new Social Platform Audience Report.
+
+        :param artist_uuid: An artist UUID.
+        :param platform: A streaming platform code. Available values: instagram, youtube, tiktok. Default: instagram.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}/report"
+        result = request_wrapper(endpoint, method="POST")
+        return result if result is not None else {}
+
+    @staticmethod
     def get_audience_report_dates(
         artist_uuid, platform, start_date=None, end_date=None, offset=0, limit=100
     ):
@@ -1208,6 +1221,19 @@ class ArtistAsync:
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}/report/latest"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def unlock_audience_report(artist_uuid, platform):
+        """
+        Unlocks and generates a new Social Platform Audience Report.
+
+        :param artist_uuid: An artist UUID.
+        :param platform: A streaming platform code. Available values: instagram, youtube, tiktok. Default: instagram.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/artist/{artist_uuid}/audience/{platform}/report"
+        result = await request_wrapper_async(endpoint, method="POST")
         return result if result is not None else {}
 
     @staticmethod
