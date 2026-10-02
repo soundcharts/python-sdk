@@ -3,6 +3,7 @@ from .api_util import (
     request_looper,
     request_wrapper_async,
     request_looper_async,
+    list_join,
 )
 
 
@@ -18,6 +19,20 @@ class Publisher:
         """
         endpoint = f"/api/v2/publisher/{publisher_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_publisher_metadata_batch(publisher_uuids):
+        """
+        Get the metadata of several publishers using their UUIDs.
+
+        :param publisher_uuids: A list of publisher UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(publisher_uuids, list):
+            raise TypeError("publisher_uuids must be a list")
+        endpoint = f"/api/v2/publisher/{list_join(publisher_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -75,6 +90,20 @@ class PublisherAsync:
         """
         endpoint = f"/api/v2/publisher/{publisher_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_publisher_metadata_batch(publisher_uuids):
+        """
+        Get the metadata of several publishers using their UUIDs.
+
+        :param publisher_uuids: A list of publisher UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(publisher_uuids, list):
+            raise TypeError("publisher_uuids must be a list")
+        endpoint = f"/api/v2/publisher/{list_join(publisher_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod

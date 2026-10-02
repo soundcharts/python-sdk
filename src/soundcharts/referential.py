@@ -1,5 +1,5 @@
 from .api_util import (
-    request_looper,
+    request_wrapper,
     request_looper,
     request_wrapper_async,
     request_looper_async,
@@ -113,6 +113,18 @@ class Referential:
         return result if result is not None else {}
 
     @staticmethod
+    def get_top_artist_metrics(sort_order="asc"):
+        """
+        Get all artist metrics available in the "Get artists" endpoint.
+        :param sort_order: Sort order. Available values are : asc, desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-artist/referential/metrics"
+        params = {"sortOrder": sort_order}
+        result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_cities_for_artist_ranking(
         country_code, search_city=None, offset=0, limit=100
     ):
@@ -206,6 +218,16 @@ class Referential:
             "limit": limit,
         }
         result = request_looper(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_collaborator_roles():
+        """
+        Get the collaborator roles available in the current ranking database.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-collaborator/referential/roles"
+        result = request_wrapper(endpoint)
         return result if result is not None else {}
 
 
@@ -316,6 +338,18 @@ class ReferentialAsync:
         return result if result is not None else {}
 
     @staticmethod
+    async def get_top_artist_metrics(sort_order="asc"):
+        """
+        Get all artist metrics available in the "Get artists" endpoint.
+        :param sort_order: Sort order. Available values are : asc, desc.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-artist/referential/metrics"
+        params = {"sortOrder": sort_order}
+        result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
     async def get_cities_for_artist_ranking(
         country_code, search_city=None, offset=0, limit=100
     ):
@@ -409,4 +443,14 @@ class ReferentialAsync:
             "limit": limit,
         }
         result = await request_looper_async(endpoint, params)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_collaborator_roles():
+        """
+        Get the collaborator roles available in the current ranking database.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = "/api/v2/top-collaborator/referential/roles"
+        result = await request_wrapper_async(endpoint)
         return result if result is not None else {}

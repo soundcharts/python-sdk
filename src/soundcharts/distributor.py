@@ -8,6 +8,17 @@ from .api_util import (
 
 
 class Distributor:
+    @staticmethod
+    def get_distributor_metadata(distributor_uuid):
+        """
+        Retrieve metadata for a specific music distributor.
+
+        :param distributor_uuid: A distributor uuid.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/distributor/{distributor_uuid}"
+        result = request_wrapper(endpoint)
+        return result if result is not None else {}
 
     @staticmethod
     def get_distributor_upc_prefixes(distributor_uuid, offset=0, limit=100):
@@ -56,6 +67,17 @@ class Distributor:
 
 
 class DistributorAsync:
+    @staticmethod
+    async def get_distributor_metadata(distributor_uuid):
+        """
+        Retrieve metadata for a specific music distributor.
+
+        :param distributor_uuid: A distributor uuid.
+        :return: JSON response or an empty dictionary.
+        """
+        endpoint = f"/api/v2/distributor/{distributor_uuid}"
+        result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
 
     @staticmethod
     async def get_distributor_upc_prefixes(distributor_uuid, offset=0, limit=100):

@@ -4,6 +4,7 @@ from .api_util import (
     request_wrapper_async,
     request_looper_async,
     sort_items_by_date,
+    list_join,
 )
 
 
@@ -53,6 +54,20 @@ class Song:
 
         endpoint = f"/api/v2.25/song/{song_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_song_metadata_batch(song_uuids):
+        """
+        Get the metadata of several songs using their UUIDs.
+
+        :param song_uuids: A list of song UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(song_uuids, list):
+            raise TypeError("song_uuids must be a list")
+        endpoint = f"/api/v2.25/song/{list_join(song_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -489,7 +504,7 @@ class Song:
 
         result = request_wrapper(endpoint, body=body)
         return result if result is not None else {}
-    
+
     @staticmethod
     def get_related_tracks(song_uuid):
         """
@@ -552,6 +567,20 @@ class SongAsync:
 
         endpoint = f"/api/v2.25/song/{song_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_song_metadata_batch(song_uuids):
+        """
+        Get the metadata of several songs using their UUIDs.
+
+        :param song_uuids: A list of song UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(song_uuids, list):
+            raise TypeError("song_uuids must be a list")
+        endpoint = f"/api/v2.25/song/{list_join(song_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -990,7 +1019,7 @@ class SongAsync:
 
         result = await request_wrapper_async(endpoint, body=body)
         return result if result is not None else {}
-    
+
     @staticmethod
     async def get_related_tracks(song_uuid):
         """

@@ -4,6 +4,7 @@ from .api_util import (
     request_wrapper_async,
     request_looper_async,
     sort_items_by_date,
+    list_join,
 )
 
 
@@ -69,6 +70,20 @@ class Playlist:
 
         endpoint = f"/api/v2.8/playlist/{playlist_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_playlist_metadata_batch(playlist_uuids):
+        """
+        Get the metadata of several playlists using their UUIDs.
+
+        :param playlist_uuids: A list of playlist UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(playlist_uuids, list):
+            raise TypeError("playlist_uuids must be a list")
+        endpoint = f"/api/v2/playlist/{list_join(playlist_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -306,6 +321,20 @@ class PlaylistAsync:
 
         endpoint = f"/api/v2.8/playlist/{playlist_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_playlist_metadata_batch(playlist_uuids):
+        """
+        Get the metadata of several playlists using their UUIDs.
+
+        :param playlist_uuids: A list of playlist UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(playlist_uuids, list):
+            raise TypeError("playlist_uuids must be a list")
+        endpoint = f"/api/v2/playlist/{list_join(playlist_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod
