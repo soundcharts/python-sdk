@@ -77,6 +77,20 @@ class Artist:
         return result if result is not None else {}
 
     @staticmethod
+    def get_artist_metadata_batch(artist_uuids):
+        """
+        Get the metadata of several artists using their UUIDs.
+
+        :param artist_uuids: A list of artist UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(artist_uuids, list):
+            raise TypeError("artist_uuids must be a list")
+        endpoint = f"/api/v2.9/artist/{list_join(artist_uuids)}"
+        result = request_looper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_artist_by_platform_id(platform, identifier):
         """
         Get Soundcharts' UUID and artist metadata based on platform IDs.
@@ -243,6 +257,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort="asc",
     ):
         """
         Get an artist's followers across services.
@@ -253,6 +268,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Sort. Available value asc|desc. Default: asc.
         :return: JSON response or an empty dictionary.
         """
 
@@ -262,6 +278,7 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
         return {} if result is None or len(result) == 0 else sort_items_by_date(result)
@@ -868,6 +885,20 @@ class ArtistAsync:
         return result if result is not None else {}
 
     @staticmethod
+    async def get_artist_metadata_batch(artist_uuids):
+        """
+        Get the metadata of several artists using their UUIDs.
+
+        :param artist_uuids: A list of artist UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(artist_uuids, list):
+            raise TypeError("artist_uuids must be a list")
+        endpoint = f"/api/v2.9/artist/{list_join(artist_uuids)}"
+        result = await request_looper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
     async def get_artist_by_platform_id(platform, identifier):
         """
         Get Soundcharts' UUID and artist metadata based on platform IDs.
@@ -1036,6 +1067,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort="asc",
     ):
         """
         Get an artist's followers across services.
@@ -1046,6 +1078,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Sort. Available value asc|desc. Default: asc.
         :return: JSON response or an empty dictionary.
         """
 
@@ -1055,6 +1088,7 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
         return {} if result is None or len(result) == 0 else sort_items_by_date(result)

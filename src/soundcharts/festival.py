@@ -4,6 +4,7 @@ from .api_util import (
     request_wrapper_async,
     request_looper_async,
     sort_items_by_date,
+    list_join,
 )
 
 
@@ -62,6 +63,20 @@ class Festival:
         """
         endpoint = f"/api/v2/festival/{festival_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_festival_metadata_batch(festival_uuids):
+        """
+        Get the metadata of several festivals using their UUIDs.
+
+        :param festival_uuids: A list of festival UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(festival_uuids, list):
+            raise TypeError("festival_uuids must be a list")
+        endpoint = f"/api/v2/festival/{list_join(festival_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -190,6 +205,20 @@ class FestivalAsync:
         """
         endpoint = f"/api/v2/festival/{festival_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_festival_metadata_batch(festival_uuids):
+        """
+        Get the metadata of several festivals using their UUIDs.
+
+        :param festival_uuids: A list of festival UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(festival_uuids, list):
+            raise TypeError("festival_uuids must be a list")
+        endpoint = f"/api/v2/festival/{list_join(festival_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod

@@ -4,6 +4,7 @@ from .api_util import (
     request_wrapper_async,
     request_looper_async,
     sort_items_by_date,
+    list_join,
 )
 
 
@@ -19,6 +20,20 @@ class Work:
         """
         endpoint = f"/api/v2/work/{work_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_work_metadata_batch(work_uuids):
+        """
+        Get the metadata of several works using their UUIDs.
+
+        :param work_uuids: A list of work UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(work_uuids, list):
+            raise TypeError("work_uuids must be a list")
+        endpoint = f"/api/v2/work/{list_join(work_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -92,6 +107,20 @@ class WorkAsync:
         """
         endpoint = f"/api/v2/work/{work_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_work_metadata_batch(work_uuids):
+        """
+        Get the metadata of several works using their UUIDs.
+
+        :param work_uuids: A list of work UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(work_uuids, list):
+            raise TypeError("work_uuids must be a list")
+        endpoint = f"/api/v2/work/{list_join(work_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod

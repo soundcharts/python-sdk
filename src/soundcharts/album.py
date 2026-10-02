@@ -3,6 +3,7 @@ from .api_util import (
     request_looper,
     request_wrapper_async,
     request_looper_async,
+    list_join,
 )
 
 
@@ -21,6 +22,20 @@ class Album:
 
         endpoint = f"/api/v2.36/album/by-uuid/{album_uuid}"
         result = request_wrapper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    def get_album_metadata_batch(album_uuids):
+        """
+        Get the metadata of several albums using their UUIDs.
+
+        :param album_uuids: A list of album UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+        if not isinstance(album_uuids, list):
+            raise TypeError("album_uuids must be a list")
+        endpoint = f"/api/v2/album/{list_join(album_uuids)}"
+        result = request_looper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -136,6 +151,19 @@ class Album:
         return result if result is not None else {}
 
     @staticmethod
+    def get_collaborators(album_uuid):
+        """
+        Get collaborators for a specific album.
+
+        :param album_uuid: An album UUID.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/album/{album_uuid}/collaborators"
+        result = request_looper(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
     def get_chart_entries(
         album_uuid,
         platform="spotify",
@@ -183,6 +211,21 @@ class AlbumAsync:
 
         endpoint = f"/api/v2.36/album/by-uuid/{album_uuid}"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_album_metadata_batch(album_uuids):
+        """
+        Get the metadata of several albums using their UUIDs.
+
+        :param album_uuids: A list of album UUIDs.
+        :return: JSON response or an empty dictionary.
+        """
+
+        if not isinstance(album_uuids, list):
+            raise TypeError("album_uuids must be a list")
+        endpoint = f"/api/v2/album/{list_join(album_uuids)}"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod
@@ -297,6 +340,19 @@ class AlbumAsync:
 
         endpoint = f"/api/v2.26/album/{album_uuid}/tracks"
         result = await request_wrapper_async(endpoint)
+        return result if result is not None else {}
+
+    @staticmethod
+    async def get_collaborators(album_uuid):
+        """
+        Get collaborators for a specific album.
+
+        :param album_uuid: An album UUID.
+        :return: JSON response or an empty dictionary.
+        """
+
+        endpoint = f"/api/v2/album/{album_uuid}/collaborators"
+        result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod
