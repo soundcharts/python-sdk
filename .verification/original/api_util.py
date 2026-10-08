@@ -167,8 +167,8 @@ async def request_wrapper_async(
 
     if method is None:
         method_name = "POST" if body else "GET"
-    elif method.lower() in ("post", "delete"):
-        method_name = method.upper()
+    elif method.lower() == "delete":
+        method_name = "DELETE"
     else:
         raise ValueError(f"Unsupported HTTP method: {method}")
 

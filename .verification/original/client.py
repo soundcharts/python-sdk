@@ -81,7 +81,6 @@ class SoundchartsClient:
         self.city = City()
         self.collaborator = Collaborator()
         self.data_feed = DataFeed()
-        self.datafeed = self.data_feed
         self.distributor = Distributor()
         self.favorite = Favorite()
         self.festival = Festival()
@@ -164,7 +163,6 @@ class SoundchartsClientAsync:
         self.city = CityAsync()
         self.collaborator = CollaboratorAsync()
         self.datafeed = DataFeedAsync()
-        self.data_feed = self.datafeed
         self.distributor = DistributorAsync()
         self.favorite = FavoriteAsync()
         self.festival = FestivalAsync()

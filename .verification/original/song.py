@@ -1030,5 +1030,5 @@ class SongAsync:
         """
 
         endpoint = f"/api/v2/song/{song_uuid}/related"
-        result = await request_wrapper_async(endpoint)
+        result = await request_wrapper(endpoint)
         return result if result is not None else {}
