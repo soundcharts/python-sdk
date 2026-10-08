@@ -380,7 +380,7 @@ class ReferentialAsync:
         """
         endpoint = f"/api/v2/referential/venue/cities/{country_code}"
         params = {"searchCity": search_city, "offset": offset, "limit": limit}
-        result = await request_looper_async(endpoint, params)
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod

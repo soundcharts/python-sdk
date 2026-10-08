@@ -314,7 +314,7 @@ class CollaboratorAsync:
         params = {"offset": offset, "limit": limit}
 
         endpoint = f"/api/v2/collaborator/{collaborator_uuid}/songs"
-        result = await request_looper_async(endpoint, params)
+        result = await request_looper(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod

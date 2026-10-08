@@ -1,0 +1,128 @@
+--- a/src/soundcharts/api_util.py
++++ b/src/soundcharts/api_util.py
+@@ -167,8 +167,8 @@
+
+     if method is None:
+         method_name = "POST" if body else "GET"
+-    elif method.lower() == "delete":
+-        method_name = "DELETE"
++    elif method.lower() in ("post", "delete"):
++        method_name = method.upper()
+     else:
+         raise ValueError(f"Unsupported HTTP method: {method}")
+
+--- a/src/soundcharts/city.py
++++ b/src/soundcharts/city.py
+@@ -89,7 +89,7 @@
+             "offset": offset,
+             "limit": limit,
+         }
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+
+     @staticmethod
+@@ -104,7 +104,7 @@
+         params = {
+             "cityKey": city_key,
+         }
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+
+     @staticmethod
+@@ -119,5 +119,5 @@
+         params = {
+             "cityKey": city_key,
+         }
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+--- a/src/soundcharts/client.py
++++ b/src/soundcharts/client.py
+@@ -81,6 +81,7 @@
+         self.city = City()
+         self.collaborator = Collaborator()
+         self.data_feed = DataFeed()
++        self.datafeed = self.data_feed
+         self.distributor = Distributor()
+         self.favorite = Favorite()
+         self.festival = Festival()
+@@ -163,6 +164,7 @@
+         self.city = CityAsync()
+         self.collaborator = CollaboratorAsync()
+         self.datafeed = DataFeedAsync()
++        self.data_feed = self.datafeed
+         self.distributor = DistributorAsync()
+         self.favorite = FavoriteAsync()
+         self.festival = FestivalAsync()
+--- a/src/soundcharts/collaborator.py
++++ b/src/soundcharts/collaborator.py
+@@ -314,7 +314,7 @@
+         params = {"offset": offset, "limit": limit}
+
+         endpoint = f"/api/v2/collaborator/{collaborator_uuid}/songs"
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+
+     @staticmethod
+--- a/src/soundcharts/label.py
++++ b/src/soundcharts/label.py
+@@ -130,7 +130,7 @@
+         params = {"platform": platform, "offset": offset, "limit": limit}
+
+         endpoint = f"/api/v2/label/{label_uuid}/identifiers"
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+
+     @staticmethod
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -5,7 +5,7 @@
+   { name="Soundcharts Tech", email="tech@soundcharts.com" },
+ ]
+ description = "A Python package for interacting with the Soundcharts API."
+-readme = "README.md"
++readme = "readme.md"
+ requires-python = ">=3.8"
+ classifiers = [
+     "Programming Language :: Python :: 3",
+--- a/src/soundcharts/referential.py
++++ b/src/soundcharts/referential.py
+@@ -380,7 +380,7 @@
+         """
+         endpoint = f"/api/v2/referential/venue/cities/{country_code}"
+         params = {"searchCity": search_city, "offset": offset, "limit": limit}
+-        result = await request_looper(endpoint, params)
++        result = await request_looper_async(endpoint, params)
+         return result if result is not None else {}
+
+     @staticmethod
+--- a/src/soundcharts/search.py
++++ b/src/soundcharts/search.py
+@@ -45,11 +45,11 @@
+
+     @staticmethod
+     def search_album_by_name(term, offset=0, limit=20):
+-        return search_by_type_async("album", term, offset, limit)
++        return search_by_type("album", term, offset, limit)
+
+     @staticmethod
+     def search_collaborator_by_name(term, offset=0, limit=20):
+-        return search_by_type_async("collaborator", term, offset, limit)
++        return search_by_type("collaborator", term, offset, limit)
+
+     @staticmethod
+     def search_song_by_name(term, offset=0, limit=20):
+--- a/src/soundcharts/song.py
++++ b/src/soundcharts/song.py
+@@ -1030,5 +1030,5 @@
+         """
+
+         endpoint = f"/api/v2/song/{song_uuid}/related"
+-        result = await request_wrapper(endpoint)
+-        return result if result is not None else {}
++        result = await request_wrapper_async(endpoint)
++        return result if result is not None else {}

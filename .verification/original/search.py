@@ -45,11 +45,11 @@ class Search:
 
     @staticmethod
     def search_album_by_name(term, offset=0, limit=20):
-        return search_by_type("album", term, offset, limit)
+        return search_by_type_async("album", term, offset, limit)
 
     @staticmethod
     def search_collaborator_by_name(term, offset=0, limit=20):
-        return search_by_type("collaborator", term, offset, limit)
+        return search_by_type_async("collaborator", term, offset, limit)
 
     @staticmethod
     def search_song_by_name(term, offset=0, limit=20):
@@ -70,7 +70,7 @@ class Search:
     @staticmethod
     def search_venue_by_name(term, offset=0, limit=20):
         return search_by_type("venue", term, offset, limit)
-    
+
     @staticmethod
     def search_label_by_name(term, offset=0, limit=20):
         return search_by_type("label", term, offset, limit)
@@ -124,7 +124,7 @@ class SearchAsync:
     @staticmethod
     async def search_venue_by_name(term, offset=0, limit=20):
         return await search_by_type_async("venue", term, offset, limit)
-    
+
     @staticmethod
     async def search_label_by_name(term, offset=0, limit=20):
         return await search_by_type_async("label", term, offset, limit)
