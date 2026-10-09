@@ -75,7 +75,7 @@ Setting the level of the console or file log to `logging.DEBUG` will log each re
 
 ## Parallel processing
 
-You can specify the number of requests to run in parallel. 
+Even in the sync client, you can specify the number of requests to run in parallel. 
 It's especially useful when looping through a lot of calls, like in this case fetching 3 months of Billie Eilish's radio airplay (about 3,000 calls):
 
 ```python
