@@ -162,7 +162,7 @@ class SoundchartsClientAsync:
         self.charts = ChartsAsync()
         self.city = CityAsync()
         self.collaborator = CollaboratorAsync()
-        self.datafeed = DataFeedAsync()
+        self.data_feed = DataFeedAsync()
         self.distributor = DistributorAsync()
         self.favorite = FavoriteAsync()
         self.festival = FestivalAsync()

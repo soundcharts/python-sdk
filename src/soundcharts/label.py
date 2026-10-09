@@ -130,7 +130,7 @@ class LabelAsync:
         params = {"platform": platform, "offset": offset, "limit": limit}
 
         endpoint = f"/api/v2/label/{label_uuid}/identifiers"
-        result = await request_looper(endpoint, params)
+        result = await request_looper_async(endpoint, params)
         return result if result is not None else {}
 
     @staticmethod

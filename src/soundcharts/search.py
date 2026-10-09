@@ -45,11 +45,11 @@ class Search:
 
     @staticmethod
     def search_album_by_name(term, offset=0, limit=20):
-        return search_by_type_async("album", term, offset, limit)
+        return search_by_type("album", term, offset, limit)
 
     @staticmethod
     def search_collaborator_by_name(term, offset=0, limit=20):
-        return search_by_type_async("collaborator", term, offset, limit)
+        return search_by_type("collaborator", term, offset, limit)
 
     @staticmethod
     def search_song_by_name(term, offset=0, limit=20):
