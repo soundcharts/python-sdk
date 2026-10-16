@@ -172,6 +172,7 @@ class Song:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the song’s Soundcharts scores.
@@ -181,6 +182,7 @@ class Song:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -190,9 +192,16 @@ class Song:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_local_streaming_audience(
@@ -202,6 +211,7 @@ class Song:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get local values for song YouTube views.
@@ -213,6 +223,7 @@ class Song:
         :param identifier: Optional song identifier.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -222,9 +233,16 @@ class Song:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_current_stats(
@@ -255,6 +273,7 @@ class Song:
         identifier=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the value of streams/plays/favorites/views for a specific song.
@@ -266,6 +285,7 @@ class Song:
         :param identifier: Optional song identifier.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -276,9 +296,16 @@ class Song:
             "identifier": identifier,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_popularity(
@@ -288,6 +315,7 @@ class Song:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
@@ -298,6 +326,7 @@ class Song:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
@@ -306,9 +335,16 @@ class Song:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_chart_entries(
@@ -428,6 +464,7 @@ class Song:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get radio spins for all tracks of a specific song.
@@ -439,6 +476,7 @@ class Song:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -450,9 +488,14 @@ class Song:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, key="airedAt")
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc", key="airedAt")
+        )
 
     @staticmethod
     def get_radio_spin_count(
@@ -687,6 +730,7 @@ class SongAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the song’s Soundcharts scores.
@@ -696,6 +740,7 @@ class SongAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -705,9 +750,16 @@ class SongAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_local_streaming_audience(
@@ -717,6 +769,7 @@ class SongAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get local values for song YouTube views.
@@ -728,6 +781,7 @@ class SongAsync:
         :param identifier: Optional song identifier.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -737,9 +791,16 @@ class SongAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_current_stats(
@@ -770,6 +831,7 @@ class SongAsync:
         identifier=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the value of streams/plays/favorites/views for a specific song.
@@ -781,6 +843,7 @@ class SongAsync:
         :param identifier: Optional song identifier.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -791,9 +854,16 @@ class SongAsync:
             "identifier": identifier,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_popularity(
@@ -803,6 +873,7 @@ class SongAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Song popularity metric indicates how popular a song is on a specific platform. It is calculated by the platform.
@@ -813,6 +884,7 @@ class SongAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/song/{song_uuid}/popularity/{platform}"
@@ -821,9 +893,16 @@ class SongAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_chart_entries(
@@ -943,6 +1022,7 @@ class SongAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get radio spins for all tracks of a specific song.
@@ -954,6 +1034,7 @@ class SongAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -965,9 +1046,14 @@ class SongAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, key="airedAt")
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc", key="airedAt")
+        )
 
     @staticmethod
     async def get_radio_spin_count(

@@ -53,7 +53,9 @@ class Radio:
         return result if result is not None else {}
 
     @staticmethod
-    def get_live_feed(radio_slug, start_date=None, end_date=None, offset=0, limit=100):
+    def get_live_feed(
+        radio_slug, start_date=None, end_date=None, offset=0, limit=100, sort=None
+    ):
         """
         Get a specific radio’s live feed for a specific range of dates.
 
@@ -62,6 +64,7 @@ class Radio:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -71,9 +74,16 @@ class Radio:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True, key="airedAt")
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc", key="airedAt"
+            )
+        )
 
     @staticmethod
     def get_ids(radio_slug, platform=None, offset=0, limit=100):
@@ -142,7 +152,7 @@ class RadioAsync:
 
     @staticmethod
     async def get_live_feed(
-        radio_slug, start_date=None, end_date=None, offset=0, limit=100
+        radio_slug, start_date=None, end_date=None, offset=0, limit=100, sort=None
     ):
         """
         Get a specific radio’s live feed for a specific range of dates.
@@ -152,6 +162,7 @@ class RadioAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -161,9 +172,16 @@ class RadioAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True, key="airedAt")
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc", key="airedAt"
+            )
+        )
 
     @staticmethod
     async def get_ids(radio_slug, platform=None, offset=0, limit=100):
