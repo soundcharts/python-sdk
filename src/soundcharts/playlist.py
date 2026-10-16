@@ -11,7 +11,9 @@ from .api_util import (
 class Playlist:
 
     @staticmethod
-    def get_playlists(platform, offset=0, limit=100, body=None, print_progress=False):
+    def get_playlists(
+        platform, offset=0, limit=100, body=None, print_progress=False, cursor=None
+    ):
         """
         You can sort playlists in our database using specific parameters such as the number of followers, 28-day adds, track count, or last updated date. Apply filters based on attributes like genre, type, country, owner, track age, percentage of adds over the last 28 days, or performance metrics.
         Please note that you can only retrieve the playlists for one platform at a time.
@@ -21,6 +23,7 @@ class Playlist:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (by metric for the platforms who have one, by 28DayAdds for others) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
+        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -55,6 +58,8 @@ class Playlist:
 
         endpoint = f"/api/v2/top/playlists/{platform}"
         params = {"offset": offset, "limit": limit}
+        if cursor is not None:
+            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -184,20 +189,27 @@ class Playlist:
         return result if result is not None else {}
 
     @staticmethod
-    def get_audience(playlist_uuid, start_date=None, end_date=None):
+    def get_audience(playlist_uuid, start_date=None, end_date=None, sort=None):
         """
         Get the playlist’s number of followers/fans/views.
 
         :param playlist_uuid: A playlist UUID.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
         endpoint = f"/api/v2.20/playlist/{playlist_uuid}/audience"
-        params = {"startDate": start_date, "endDate": end_date}
+        params = {"startDate": start_date, "endDate": end_date, "sort": sort}
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_tracklisting_latest(playlist_uuid, offset=0, limit=100):
@@ -216,13 +228,13 @@ class Playlist:
 
     @staticmethod
     def get_tracklisting_dates(
-        playlist_uuid, start_date=None, end_date=None, offset=0, limit=100
+        playlist_uuid, period=30, end_date=None, offset=0, limit=100
     ):
         """
         Get the available playlist’s tracklisting dates.
 
         :param playlist_uuid: A playlist UUID.
-        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param period: Number of historical days (max. 90). Default: 30.
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
@@ -230,7 +242,7 @@ class Playlist:
         """
         endpoint = f"/api/v2.20/playlist/{playlist_uuid}/available-tracklistings"
         params = {
-            "startDate": start_date,
+            "period": period,
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
@@ -259,7 +271,7 @@ class PlaylistAsync:
 
     @staticmethod
     async def get_playlists(
-        platform, offset=0, limit=100, body=None, print_progress=False
+        platform, offset=0, limit=100, body=None, print_progress=False, cursor=None
     ):
         """
         You can sort playlists in our database using specific parameters such as the number of followers, 28-day adds, track count, or last updated date. Apply filters based on attributes like genre, type, country, owner, track age, percentage of adds over the last 28 days, or performance metrics.
@@ -270,6 +282,7 @@ class PlaylistAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (by metric for the platforms who have one, by 28DayAdds for others) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
+        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -304,6 +317,8 @@ class PlaylistAsync:
 
         endpoint = f"/api/v2/top/playlists/{platform}"
         params = {"offset": offset, "limit": limit}
+        if cursor is not None:
+            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress
@@ -435,20 +450,27 @@ class PlaylistAsync:
         return result if result is not None else {}
 
     @staticmethod
-    async def get_audience(playlist_uuid, start_date=None, end_date=None):
+    async def get_audience(playlist_uuid, start_date=None, end_date=None, sort=None):
         """
         Get the playlist’s number of followers/fans/views.
 
         :param playlist_uuid: A playlist UUID.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
         endpoint = f"/api/v2.20/playlist/{playlist_uuid}/audience"
-        params = {"startDate": start_date, "endDate": end_date}
+        params = {"startDate": start_date, "endDate": end_date, "sort": sort}
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_tracklisting_latest(playlist_uuid, offset=0, limit=100):
@@ -467,13 +489,13 @@ class PlaylistAsync:
 
     @staticmethod
     async def get_tracklisting_dates(
-        playlist_uuid, start_date=None, end_date=None, offset=0, limit=100
+        playlist_uuid, period=30, end_date=None, offset=0, limit=100
     ):
         """
         Get the available playlist’s tracklisting dates.
 
         :param playlist_uuid: A playlist UUID.
-        :param start_date: Optional period start date (format YYYY-MM-DD).
+        :param period: Number of historical days (max. 90). Default: 30.
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
@@ -481,7 +503,7 @@ class PlaylistAsync:
         """
         endpoint = f"/api/v2.20/playlist/{playlist_uuid}/available-tracklistings"
         params = {
-            "startDate": start_date,
+            "period": period,
             "endDate": end_date,
             "offset": offset,
             "limit": limit,

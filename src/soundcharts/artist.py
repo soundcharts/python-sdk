@@ -19,6 +19,7 @@ class Artist:
         limit=100,
         body=None,
         print_progress=False,
+        cursor=None,
     ):
         """
         You can sort artists in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like nationality, genre, sub-genre, career stage, etc. or performance metrics.
@@ -31,6 +32,7 @@ class Artist:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (spotify followers for global ranking, instagram followers for country ranking, spotify monthly listeners for city ranking) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
+        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -59,6 +61,8 @@ class Artist:
             "offset": offset,
             "limit": limit,
         }
+        if cursor is not None:
+            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -226,7 +230,7 @@ class Artist:
 
     @staticmethod
     def get_soundcharts_score(
-        artist_uuid, start_date=None, end_date=None, offset=0, limit=100
+        artist_uuid, start_date=None, end_date=None, offset=0, limit=100, sort=None
     ):
         """
         This API returns 3 Soundcharts scores per artist: score, fanbase score and trending score.
@@ -236,6 +240,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -245,6 +250,7 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_wrapper(endpoint, params)
         return result if result is not None else {}
@@ -291,6 +297,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get all values for artist followers for a month and located followers for a given date within that month.
@@ -301,6 +308,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -310,9 +318,14 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_streaming_audience(
@@ -322,6 +335,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the value for listeners/streams/views per artist.
@@ -332,6 +346,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}/listening"
@@ -340,9 +355,14 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_local_streaming_audience(
@@ -352,6 +372,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get daily values for Spotify monthly listeners and YouTube views per artist.
@@ -362,6 +383,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}"
@@ -370,9 +392,14 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_retention(
@@ -382,6 +409,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get an artist's fan retention rate across platforms.
@@ -392,6 +420,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/{platform}/retention"
@@ -400,9 +429,14 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_popularity(
@@ -412,6 +446,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get daily values for artist popularity (spotify and tidal).
@@ -422,6 +457,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/popularity/{platform}"
@@ -430,9 +466,14 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_audience_report_latest(artist_uuid, platform):
@@ -519,7 +560,7 @@ class Artist:
 
     @staticmethod
     def get_short_video_audience(
-        identifier, start_date=None, end_date=None, offset=0, limit=100
+        identifier, start_date=None, end_date=None, offset=0, limit=100, sort=None
     ):
         """
         Get artist metadata/ISNI/IPI numbers using their UUID.
@@ -529,6 +570,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/shorts/{identifier}/audience"
@@ -537,9 +579,16 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     def get_chart_song_entries(
@@ -666,6 +715,7 @@ class Artist:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get playlist reach & count for a specific artist.
@@ -677,6 +727,7 @@ class Artist:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/playlist/reach/{platform}"
@@ -687,6 +738,7 @@ class Artist:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = request_looper(endpoint, params)
         return result if result is not None else {}
@@ -825,6 +877,7 @@ class ArtistAsync:
         limit=100,
         body=None,
         print_progress=False,
+        cursor=None,
     ):
         """
         You can sort artists in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like nationality, genre, sub-genre, career stage, etc. or performance metrics.
@@ -837,6 +890,7 @@ class ArtistAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (spotify followers for global ranking, instagram followers for country ranking, spotify monthly listeners for city ranking) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
+        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -865,6 +919,8 @@ class ArtistAsync:
             "offset": offset,
             "limit": limit,
         }
+        if cursor is not None:
+            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress
@@ -1036,7 +1092,7 @@ class ArtistAsync:
 
     @staticmethod
     async def get_soundcharts_score(
-        artist_uuid, start_date=None, end_date=None, offset=0, limit=100
+        artist_uuid, start_date=None, end_date=None, offset=0, limit=100, sort=None
     ):
         """
         This API returns 3 Soundcharts scores per artist: score, fanbase score and trending score.
@@ -1046,6 +1102,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -1055,6 +1112,7 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_wrapper_async(endpoint, params)
         return result if result is not None else {}
@@ -1101,6 +1159,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get all values for artist followers for a month and located followers for a given date within that month.
@@ -1111,6 +1170,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
 
@@ -1120,9 +1180,14 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_streaming_audience(
@@ -1132,6 +1197,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get the value for listeners/streams/views per artist.
@@ -1142,6 +1208,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}/listening"
@@ -1150,9 +1217,14 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_local_streaming_audience(
@@ -1162,6 +1234,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get daily values for Spotify monthly listeners and YouTube views per artist.
@@ -1172,6 +1245,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/streaming/{platform}"
@@ -1180,9 +1254,14 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_retention(
@@ -1192,6 +1271,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get an artist's fan retention rate across platforms.
@@ -1202,6 +1282,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/{platform}/retention"
@@ -1210,9 +1291,14 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_popularity(
@@ -1222,6 +1308,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get daily values for artist popularity (spotify and tidal).
@@ -1232,6 +1319,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/popularity/{platform}"
@@ -1240,9 +1328,14 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_audience_report_latest(artist_uuid, platform):
@@ -1328,19 +1421,28 @@ class ArtistAsync:
         return result if result is not None else {}
 
     @staticmethod
-    async def get_short_video_audience(identifier, start_date=None, end_date=None):
+    async def get_short_video_audience(
+        identifier, start_date=None, end_date=None, sort=None
+    ):
         """
         Get artist metadata/ISNI/IPI numbers using their UUID.
 
         :param identifier: A short/reel video identifier.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/shorts/{identifier}/audience"
-        params = {"startDate": start_date, "endDate": end_date}
+        params = {"startDate": start_date, "endDate": end_date, "sort": sort}
         result = await request_looper_async(endpoint, params)
-        return {} if result is None else sort_items_by_date(result, True)
+        return (
+            {}
+            if result is None
+            else sort_items_by_date(
+                result, reverse=True if sort is None else sort == "desc"
+            )
+        )
 
     @staticmethod
     async def get_chart_song_entries(
@@ -1467,6 +1569,7 @@ class ArtistAsync:
         end_date=None,
         offset=0,
         limit=100,
+        sort=None,
     ):
         """
         Get playlist reach & count for a specific artist.
@@ -1478,6 +1581,7 @@ class ArtistAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param offset: Pagination offset. Default: 0.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/{artist_uuid}/playlist/reach/{platform}"
@@ -1488,6 +1592,7 @@ class ArtistAsync:
             "endDate": end_date,
             "offset": offset,
             "limit": limit,
+            "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
         return result if result is not None else {}

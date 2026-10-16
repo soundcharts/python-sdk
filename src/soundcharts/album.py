@@ -20,7 +20,7 @@ class Album:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-uuid/{album_uuid}"
+        endpoint = f"/api/v2.51/album/by-uuid/{album_uuid}"
         result = request_wrapper(endpoint)
         return result if result is not None else {}
 
@@ -47,7 +47,7 @@ class Album:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-upc/{upc}"
+        endpoint = f"/api/v2.51/album/by-upc/{upc}"
         result = request_wrapper(endpoint)
         return result if result is not None else {}
 
@@ -61,12 +61,12 @@ class Album:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-platform/{platform}/{identifier}"
+        endpoint = f"/api/v2.51/album/by-platform/{platform}/{identifier}"
         result = request_wrapper(endpoint)
         return result if result is not None else {}
 
     @staticmethod
-    def get_ids(album_uuid, platform=None, offset=0, limit=100):
+    def get_ids(album_uuid, platform=None, offset=0, limit=100, only_default=None):
         """
         Get platform URLs/ISNI associated with a specific album.
 
@@ -74,12 +74,14 @@ class Album:
         :param platform: A platform code. Default: None.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param only_default: Optional boolean to return only default identifiers per platform. Default: None.
         :return: JSON response or an empty dictionary.
         """
         params = {
             "platform": platform,
             "offset": offset,
             "limit": limit,
+            "onlyDefault": str(only_default).lower() if only_default is not None else None,
         }
 
         endpoint = f"/api/v2.26/album/{album_uuid}/identifiers"
@@ -94,6 +96,7 @@ class Album:
         end_date=None,
         identifier=None,
         limit=100,
+        sort=None,
     ):
         """
         Get platform URLs/ISNI associated with a specific album.
@@ -104,6 +107,7 @@ class Album:
         :param end_date: Optional period end date (format YYYY-MM-DD).
         :param identifier: Optional album identifier (example : 2Fxmhks0bxGSBdJ92vM42m).
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         params = {
@@ -111,6 +115,7 @@ class Album:
             "endDate": end_date,
             "identifier": identifier,
             "limit": limit,
+            "sort": sort,
         }
 
         endpoint = f"/api/v2/album/{album_uuid}/audience/{platform}"
@@ -118,7 +123,9 @@ class Album:
         return result if result is not None else {}
 
     @staticmethod
-    def get_popularity(album_uuid, platform="spotify", start_date=None, end_date=None):
+    def get_popularity(
+        album_uuid, platform="spotify", start_date=None, end_date=None, sort=None
+    ):
         """
         Get daily values for album popularity.
 
@@ -126,11 +133,13 @@ class Album:
         :param platform: A platform code. Available values : spotify, deezer. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD).
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         params = {
             "startDate": start_date,
             "endDate": end_date,
+            "sort": sort,
         }
 
         endpoint = f"/api/v2/album/{album_uuid}/popularity/{platform}"
@@ -209,7 +218,7 @@ class AlbumAsync:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-uuid/{album_uuid}"
+        endpoint = f"/api/v2.51/album/by-uuid/{album_uuid}"
         result = await request_wrapper_async(endpoint)
         return result if result is not None else {}
 
@@ -237,7 +246,7 @@ class AlbumAsync:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-upc/{upc}"
+        endpoint = f"/api/v2.51/album/by-upc/{upc}"
         result = await request_wrapper_async(endpoint)
         return result if result is not None else {}
 
@@ -251,12 +260,12 @@ class AlbumAsync:
         :return: JSON response or an empty dictionary.
         """
 
-        endpoint = f"/api/v2.36/album/by-platform/{platform}/{identifier}"
+        endpoint = f"/api/v2.51/album/by-platform/{platform}/{identifier}"
         result = await request_wrapper_async(endpoint)
         return result if result is not None else {}
 
     @staticmethod
-    async def get_ids(album_uuid, platform=None, offset=0, limit=100):
+    async def get_ids(album_uuid, platform=None, offset=0, limit=100, only_default=None):
         """
         Get platform URLs/ISNI associated with a specific album.
 
@@ -264,12 +273,14 @@ class AlbumAsync:
         :param platform: A platform code. Default: None.
         :param offset: Pagination offset.
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param only_default: Optional boolean to return only default identifiers per platform. Default: None.
         :return: JSON response or an empty dictionary.
         """
         params = {
             "platform": platform,
             "offset": offset,
             "limit": limit,
+            "onlyDefault": str(only_default).lower() if only_default is not None else None,
         }
 
         endpoint = f"/api/v2.26/album/{album_uuid}/identifiers"
@@ -284,6 +295,7 @@ class AlbumAsync:
         end_date=None,
         identifier=None,
         limit=100,
+        sort=None,
     ):
         """
         Get platform URLs/ISNI associated with a specific album.
@@ -294,6 +306,7 @@ class AlbumAsync:
         :param end_date: Optional period end date (format YYYY-MM-DD).
         :param identifier: Optional album identifier (example : 2Fxmhks0bxGSBdJ92vM42m).
         :param limit: Number of results to retrieve. None: no limit. Default: 100.
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         params = {
@@ -301,6 +314,7 @@ class AlbumAsync:
             "endDate": end_date,
             "identifier": identifier,
             "limit": limit,
+            "sort": sort,
         }
 
         endpoint = f"/api/v2/album/{album_uuid}/audience/{platform}"
@@ -309,7 +323,7 @@ class AlbumAsync:
 
     @staticmethod
     async def get_popularity(
-        album_uuid, platform="spotify", start_date=None, end_date=None
+        album_uuid, platform="spotify", start_date=None, end_date=None, sort=None
     ):
         """
         Get daily values for album popularity.
@@ -318,11 +332,13 @@ class AlbumAsync:
         :param platform: A platform code. Available values : spotify, deezer. Default: spotify.
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD).
+        :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
         :return: JSON response or an empty dictionary.
         """
         params = {
             "startDate": start_date,
             "endDate": end_date,
+            "sort": sort,
         }
 
         endpoint = f"/api/v2/album/{album_uuid}/popularity/{platform}"
