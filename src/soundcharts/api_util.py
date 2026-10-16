@@ -349,10 +349,23 @@ async def request_looper_async(
     body=None,
     print_progress=False,
     max_parallel_requests=None,
+    *,
+    _strict=False,
 ):
     global PARALLEL_REQUESTS
     if max_parallel_requests is None:
         max_parallel_requests = PARALLEL_REQUESTS
+
+    def validate_page(response):
+        if (
+            not isinstance(response, dict)
+            or not isinstance(response.get("items"), list)
+            or not isinstance(response.get("page"), dict)
+            or type(response["page"].get("total")) is not int
+            or response["page"]["total"] < 0
+            or response.get("errors") or response.get("error")
+        ):
+            raise RuntimeError("Incomplete pagination response")
 
     def print_percentage(progress, total):
         if total > 0:
@@ -385,6 +398,8 @@ async def request_looper_async(
             session=session,
         )
 
+        if _strict:
+            validate_page(results)
         if not results or "items" not in results:
             return results
 
@@ -468,6 +483,8 @@ async def request_looper_async(
                         body=body,
                         session=session,
                     )
+                if _strict:
+                    validate_page(resp)
                 return off, resp
 
             for o in extra_offsets:
@@ -479,6 +496,12 @@ async def request_looper_async(
             for task in asyncio.as_completed(tasks):
                 try:
                     off, response = await task
+                except asyncio.CancelledError:
+                    if _strict:
+                        for pending_task in tasks:
+                            pending_task.cancel()
+                        await asyncio.gather(*tasks, return_exceptions=True)
+                    raise
                 except Exception as exc:
                     logger.error(
                         "Request task failed for %s offset=%s: %s",
@@ -491,6 +514,8 @@ async def request_looper_async(
                         pending_task.cancel()
                     if pending:
                         await asyncio.gather(*pending, return_exceptions=True)
+                    if _strict:
+                        raise
                     break
 
                 if not response or "items" not in response:
