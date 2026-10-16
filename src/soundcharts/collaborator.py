@@ -184,7 +184,11 @@ class Collaborator:
             "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
 
 class CollaboratorAsync:
@@ -365,4 +369,8 @@ class CollaboratorAsync:
             "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
