@@ -71,8 +71,8 @@ class Collaborator:
         :return: JSON response or an empty dictionary.
         """
         if not isinstance(collaborator_uuids, list):
-            raise TypeError("artist_uuids must be a list")
-        endpoint = f"/api/v2.9/artist/{list_join(collaborator_uuids)}"
+            raise TypeError("collaborator_uuids must be a list")
+        endpoint = f"/api/v2/collaborator/{list_join(collaborator_uuids)}"
         result = request_looper(endpoint)
         return result if result is not None else {}
 
@@ -252,8 +252,8 @@ class CollaboratorAsync:
         :return: JSON response or an empty dictionary.
         """
         if not isinstance(collaborator_uuids, list):
-            raise TypeError("artist_uuids must be a list")
-        endpoint = f"/api/v2.9/artist/{list_join(collaborator_uuids)}"
+            raise TypeError("collaborator_uuids must be a list")
+        endpoint = f"/api/v2/collaborator/{list_join(collaborator_uuids)}"
         result = await request_looper_async(endpoint)
         return result if result is not None else {}
 
