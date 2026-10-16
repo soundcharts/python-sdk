@@ -283,7 +283,11 @@ class Artist:
             "sort": sort,
         }
         result = request_looper(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     def get_local_audience(
@@ -1141,7 +1145,11 @@ class ArtistAsync:
             "sort": sort,
         }
         result = await request_looper_async(endpoint, params)
-        return {} if result is None or len(result) == 0 else sort_items_by_date(result)
+        return (
+            {}
+            if result is None or len(result) == 0
+            else sort_items_by_date(result, reverse=sort == "desc")
+        )
 
     @staticmethod
     async def get_local_audience(
@@ -1414,7 +1422,7 @@ class ArtistAsync:
 
     @staticmethod
     async def get_short_video_audience(
-        identifier, start_date=None, end_date=None, sort=None
+        identifier, start_date=None, end_date=None, sort=None, offset=0, limit=100
     ):
         """
         Get artist metadata/ISNI/IPI numbers using their UUID.
@@ -1423,10 +1431,18 @@ class ArtistAsync:
         :param start_date: Optional period start date (format YYYY-MM-DD).
         :param end_date: Optional period end date (format YYYY-MM-DD), leave empty for the latest results.
         :param sort: Optional sort order: asc or desc. None preserves the existing ordering.
+        :param offset: Pagination offset.
+        :param limit: Number of results to retrieve. None: no limit. Default: 100.
         :return: JSON response or an empty dictionary.
         """
         endpoint = f"/api/v2/artist/shorts/{identifier}/audience"
-        params = {"startDate": start_date, "endDate": end_date, "sort": sort}
+        params = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "offset": offset,
+            "limit": limit,
+            "sort": sort,
+        }
         result = await request_looper_async(endpoint, params)
         return (
             {}

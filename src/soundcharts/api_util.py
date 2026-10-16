@@ -166,7 +166,7 @@ async def request_wrapper_async(
         params[k] = v
 
     if method is None:
-        method_name = "POST" if body else "GET"
+        method_name = "POST" if body is not None else "GET"
     elif method.lower() in ("post", "delete"):
         method_name = method.upper()
     else:
@@ -186,7 +186,7 @@ async def request_wrapper_async(
 
             # 1. State/Header Injection per-attempt
             headers = dict(HEADERS or {})
-            if body:
+            if body is not None:
                 headers["Content-Type"] = "application/json"
 
             # Evaluate OAuth token state inside the retry loop
@@ -207,7 +207,7 @@ async def request_wrapper_async(
                 logger.debug("Headers: %s", headers)
                 if params:
                     logger.debug("Params: %s", params)
-                if body:
+                if body is not None:
                     logger.debug("Body: %s", json.dumps(body))
 
                 async with session.request(
@@ -215,7 +215,7 @@ async def request_wrapper_async(
                     url,
                     params=params,
                     headers=headers,
-                    data=json.dumps(body) if body else None,
+                    data=json.dumps(body) if body is not None else None,
                 ) as response:
                     status = response.status
                     text = await response.text()
@@ -394,14 +394,15 @@ async def request_looper_async(
 
         first_page = results.get("page", {}) or {}
         total_server = first_page.get("total", len(items))
+        remaining = max(total_server - params["offset"], 0)
         total_effective = (
-            min(total_server, limit) if limit is not None else total_server
+            min(remaining, limit) if limit is not None else remaining
         )
 
         if print_progress:
             print_percentage(fetched_count, total_effective)
 
-        fetched_all = (limit is None) or (limit >= total_server)
+        fetched_all = (limit is None) or (limit >= remaining)
 
         if fetched_count >= total_effective:
             if limit is not None:
@@ -433,7 +434,7 @@ async def request_looper_async(
                     BATCH_SIZE, current_offset + (total_effective - fetched_count)
                 )
             else:
-                end_offset = total_effective
+                end_offset = params["offset"] + total_effective
 
             extra_offsets = list(range(current_offset, end_offset, page_size))
 
