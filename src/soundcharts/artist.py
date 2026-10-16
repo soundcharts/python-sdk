@@ -19,7 +19,6 @@ class Artist:
         limit=100,
         body=None,
         print_progress=False,
-        cursor=None,
     ):
         """
         You can sort artists in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like nationality, genre, sub-genre, career stage, etc. or performance metrics.
@@ -32,7 +31,6 @@ class Artist:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (spotify followers for global ranking, instagram followers for country ranking, spotify monthly listeners for city ranking) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -61,8 +59,6 @@ class Artist:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -877,7 +873,6 @@ class ArtistAsync:
         limit=100,
         body=None,
         print_progress=False,
-        cursor=None,
     ):
         """
         You can sort artists in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like nationality, genre, sub-genre, career stage, etc. or performance metrics.
@@ -890,7 +885,6 @@ class ArtistAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (spotify followers for global ranking, instagram followers for country ranking, spotify monthly listeners for city ranking) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -919,8 +913,6 @@ class ArtistAsync:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress

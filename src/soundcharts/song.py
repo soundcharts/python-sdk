@@ -10,7 +10,7 @@ from .api_util import (
 
 class Song:
     @staticmethod
-    def get_songs(offset=0, limit=100, body=None, print_progress=False, cursor=None):
+    def get_songs(offset=0, limit=100, body=None, print_progress=False):
         """
         You can sort songs in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like artist nationality, ISRC country, song genre, release date, attributes from lyrics analysis, etc. or performance metrics.
         Available platfom/metricType combinations can be found in the documentation: https://developers.soundcharts.com/documentation/reference/song/get-songs
@@ -19,7 +19,6 @@ class Song:
         :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending spotify streams) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -40,8 +39,6 @@ class Song:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -567,9 +564,7 @@ class Song:
 
 class SongAsync:
     @staticmethod
-    async def get_songs(
-        offset=0, limit=100, body=None, print_progress=False, cursor=None
-    ):
+    async def get_songs(offset=0, limit=100, body=None, print_progress=False):
         """
         You can sort songs in our database using specific parameters such as platform, metric type, or time period, and filter them based on attributes like artist nationality, ISRC country, song genre, release date, attributes from lyrics analysis, etc. or performance metrics.
         Available platfom/metricType combinations can be found in the documentation: https://developers.soundcharts.com/documentation/reference/song/get-songs
@@ -578,7 +573,6 @@ class SongAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending spotify streams) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -599,8 +593,6 @@ class SongAsync:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress

@@ -16,7 +16,6 @@ class Venue:
         limit=100,
         body=None,
         print_progress=False,
-        cursor=None,
     ):
         """
         Get a list of venues filtered by attributes and stats.
@@ -28,7 +27,6 @@ class Venue:
         :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending soundcharts score) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -51,8 +49,6 @@ class Venue:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -158,7 +154,6 @@ class VenueAsync:
         limit=100,
         body=None,
         print_progress=False,
-        cursor=None,
     ):
         """
         Get a list of venues filtered by attributes and stats.
@@ -170,7 +165,6 @@ class VenueAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take thousands of calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (descending soundcharts score) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -193,8 +187,6 @@ class VenueAsync:
             "offset": offset,
             "limit": limit,
         }
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress

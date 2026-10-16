@@ -11,9 +11,7 @@ from .api_util import (
 class Playlist:
 
     @staticmethod
-    def get_playlists(
-        platform, offset=0, limit=100, body=None, print_progress=False, cursor=None
-    ):
+    def get_playlists(platform, offset=0, limit=100, body=None, print_progress=False):
         """
         You can sort playlists in our database using specific parameters such as the number of followers, 28-day adds, track count, or last updated date. Apply filters based on attributes like genre, type, country, owner, track age, percentage of adds over the last 28 days, or performance metrics.
         Please note that you can only retrieve the playlists for one platform at a time.
@@ -23,7 +21,6 @@ class Playlist:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (by metric for the platforms who have one, by 28DayAdds for others) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -58,8 +55,6 @@ class Playlist:
 
         endpoint = f"/api/v2/top/playlists/{platform}"
         params = {"offset": offset, "limit": limit}
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = request_looper(endpoint, params, body, print_progress=print_progress)
         return result if result is not None else {}
@@ -271,7 +266,7 @@ class PlaylistAsync:
 
     @staticmethod
     async def get_playlists(
-        platform, offset=0, limit=100, body=None, print_progress=False, cursor=None
+        platform, offset=0, limit=100, body=None, print_progress=False
     ):
         """
         You can sort playlists in our database using specific parameters such as the number of followers, 28-day adds, track count, or last updated date. Apply filters based on attributes like genre, type, country, owner, track age, percentage of adds over the last 28 days, or performance metrics.
@@ -282,7 +277,6 @@ class PlaylistAsync:
         :param limit: Number of results to retrieve. None: no limit (warning: can take up to 100,000 calls - you may want to use parallel processing). Default: 100.
         :param body: JSON Payload. If none, the default sorting will apply (by metric for the platforms who have one, by 28DayAdds for others) and there will be no filters.
         :param print_progress: Prints an estimated progress percentage (default: False).
-        :param cursor: Optional pagination cursor. Default: None.
         :return: JSON response or an empty dictionary.
         """
 
@@ -317,8 +311,6 @@ class PlaylistAsync:
 
         endpoint = f"/api/v2/top/playlists/{platform}"
         params = {"offset": offset, "limit": limit}
-        if cursor is not None:
-            params["cursor"] = cursor
 
         result = await request_looper_async(
             endpoint, params, body, print_progress=print_progress
